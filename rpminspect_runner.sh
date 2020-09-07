@@ -5,7 +5,7 @@
 
 set -e
 
-trap fix_rc EXIT SIGINT
+trap fix_rc EXIT SIGINT SIGSEGV
 fix_rc() {
     retval=$?
     # rpminspect status codes:

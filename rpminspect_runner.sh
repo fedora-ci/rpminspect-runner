@@ -84,6 +84,5 @@ echo "${test_description}"
 echo
 echo "======================================== Test Output ========================================"
 
-set -x
 rpminspect -V
 rpminspect --arches x86_64,noarch,src --tests=${test_name} ${before_build} ${after_build}

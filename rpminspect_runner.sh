@@ -5,6 +5,21 @@
 
 set -e
 
+trap fix_rc EXIT SIGINT
+fix_rc() {
+    retval=$?
+    # rpminspect status codes:
+    # RI_INSPECTION_SUCCESS = 0,   /* inspections passed */
+    # RI_INSPECTION_FAILURE = 1,   /* inspections failed */
+    # RI_PROGRAM_ERROR = 2         /* program errored in some way */
+    if [ retval -gt 2 ]; then
+        # something unexpected happened — treat it as an infra error
+        exit 2
+    fi
+    exit $retval
+}
+
+
 task_id=$1
 release_id=$2
 test_name=$3

@@ -12,7 +12,7 @@ fix_rc() {
     # RI_INSPECTION_SUCCESS = 0,   /* inspections passed */
     # RI_INSPECTION_FAILURE = 1,   /* inspections failed */
     # RI_PROGRAM_ERROR = 2         /* program errored in some way */
-    if [ retval -gt 2 ]; then
+    if [ ${retval} -gt 2 ]; then
         # something unexpected happened — treat it as an infra error
         exit 2
     fi

@@ -100,4 +100,4 @@ echo
 echo "======================================== Test Output ========================================"
 
 rpminspect -V
-rpminspect --arches x86_64,noarch,src --tests=${test_name} ${before_build} ${after_build}
+rpminspect -c /usr/share/rpminspect/fedora.yaml --arches x86_64,noarch,src --tests=${test_name} ${before_build} ${after_build}

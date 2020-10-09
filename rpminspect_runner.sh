@@ -19,6 +19,7 @@ fix_rc() {
     exit $retval
 }
 
+config="/usr/share/rpminspect/fedora.yaml"
 
 task_id=$1
 release_id=$2
@@ -83,8 +84,8 @@ mkdir -p ${workdir}
 
 # Download and cache packages, if not downloaded already
 if [ ! -f ${downloaded_file} ]; then
-    rpminspect -v -w ${workdir} -f ${after_build}
-    rpminspect -v -w ${workdir} -f ${before_build}
+    rpminspect -c ${config} -v -w ${workdir} -f ${after_build}
+    rpminspect -c ${config} -v -w ${workdir} -f ${before_build}
     touch ${downloaded_file}
 fi
 
@@ -100,4 +101,4 @@ echo
 echo "======================================== Test Output ========================================"
 
 rpminspect -V
-rpminspect -c /usr/share/rpminspect/fedora.yaml --arches x86_64,noarch,src --tests=${test_name} ${before_build} ${after_build}
+rpminspect -c ${config} --arches x86_64,noarch,src --tests=${test_name} ${before_build} ${after_build}

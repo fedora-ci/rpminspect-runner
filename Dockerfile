@@ -18,6 +18,7 @@ RUN dnf -y install 'dnf-command(copr)' && \
 RUN dnf -y install \
     rpminspect-${RPMINSPECT_VERSION} \
     rpminspect-data-fedora-${RPMINSPECT_DATA_VERSION} \
+    libabigail \
     koji \
     && dnf clean all
 

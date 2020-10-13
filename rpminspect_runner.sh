@@ -101,4 +101,4 @@ echo
 echo "======================================== Test Output ========================================"
 
 rpminspect -V
-rpminspect -c ${config} --arches x86_64,noarch,src --tests=${test_name} ${before_build} ${after_build}
+rpminspect -c ${config} --arches x86_64,noarch,src --release=${release_id} --tests=${test_name} ${before_build} ${after_build}

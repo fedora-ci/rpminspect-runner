@@ -21,6 +21,6 @@ RUN dnf -y install \
     koji \
     && dnf clean all
 
-COPY rpminspect_runner.sh /usr/local/bin/rpminspect_runner
+COPY rpminspect_runner.sh /usr/local/bin/
 
 WORKDIR ${RPMINSPECT_WORKDIR}

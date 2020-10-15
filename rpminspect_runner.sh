@@ -19,7 +19,7 @@ fix_rc() {
     exit $retval
 }
 
-config="/usr/share/rpminspect/fedora.yaml"
+config=${CONFIG:-/usr/share/rpminspect/fedora.yaml}
 
 task_id=$1
 release_id=$2

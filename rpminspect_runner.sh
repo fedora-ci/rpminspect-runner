@@ -29,6 +29,10 @@ test_name=$3
 # For example: f34-updates
 updates_tag=${UPDATES_TAG:-${release_id}-updates}
 
+# In case there is no dist tag (like ".fc34") in the package name,
+# rpminspect doesn't know which test configuration to use
+default_release_string=${DEFAULT_RELEASE_STRING:-${release_id}}
+
 
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
@@ -101,4 +105,4 @@ echo
 echo "======================================== Test Output ========================================"
 
 rpminspect -V
-rpminspect -c ${config} --arches x86_64,noarch,src --release=${release_id} --tests=${test_name} ${before_build} ${after_build}
+rpminspect -c ${config} --arches x86_64,noarch,src --release=${default_release_string} --tests=${test_name} ${before_build} ${after_build}

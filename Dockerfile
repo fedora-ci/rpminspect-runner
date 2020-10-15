@@ -2,7 +2,7 @@ FROM registry.fedoraproject.org/fedora:32
 LABEL maintainer "Fedora-CI"
 LABEL description="rpminspect for fedora-ci"
 
-ENV RPMINSPECT_VERSION=1.2-0.1.202010081406git.fc32
+ENV RPMINSPECT_VERSION=1.2-0.1.202010151343git.fc32
 ENV RPMINSPECT_DATA_VERSION=1:1.2-0.1.202010072008git.fc32
 
 ENV RPMINSPECT_WORKDIR=/workdir/

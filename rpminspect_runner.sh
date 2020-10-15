@@ -2,6 +2,13 @@
 
 # Usage:
 # ./rpminspect_runner.sh $TASK_ID $RELEASE_ID $TEST_NAME
+#
+# The script recognizes following environment variables:
+# CONFIG - path to the rpminspect config file
+# UPDATES_TAG - koji tag where to look for previous builds
+# DEFAULT_RELEASE_STRING - release string to use in case builds
+#                          don't have them (e.g.: missing ".fc34")
+# RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 
 set -e
 
@@ -12,6 +19,9 @@ fix_rc() {
     # RI_INSPECTION_SUCCESS = 0,   /* inspections passed */
     # RI_INSPECTION_FAILURE = 1,   /* inspections failed */
     # RI_PROGRAM_ERROR = 2         /* program errored in some way */
+    #
+    # These status codes need to be translated into tmt status codes,
+    # so tmt can correctly recognize failures, errors, and successes.
     if [ ${retval} -gt 2 ]; then
         # something unexpected happened — treat it as an infra error
         exit 2
@@ -26,7 +36,7 @@ release_id=$2
 test_name=$3
 
 # Koji tag where to look for previous builds;
-# For example: f34-updates
+# For example: "f34-updates"
 updates_tag=${UPDATES_TAG:-${release_id}-updates}
 
 # In case there is no dist tag (like ".fc34") in the package name,

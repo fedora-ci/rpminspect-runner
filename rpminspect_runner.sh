@@ -9,6 +9,7 @@
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
+# RPMINSPECT_CLEANUP - remove downloaded rpms after testing
 
 set -e
 
@@ -118,3 +119,6 @@ echo "======================================== Test Output =====================
 
 rpminspect -V
 rpminspect -c ${config} --arches x86_64,noarch,src --release=${default_release_string} --tests=${test_name} ${before_build} ${after_build}
+
+# Cleanup downloaded rpms
+[ -n "$RPMINSPECT_CLEANUP" ] && find ${workdir} -name *.rpm -delete

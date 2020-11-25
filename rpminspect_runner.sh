@@ -9,6 +9,7 @@
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
+# KOJI_BIN - path where to find "koji" binary
 
 set -e
 
@@ -30,6 +31,7 @@ fix_rc() {
 }
 
 config=${CONFIG:-/usr/share/rpminspect/fedora.yaml}
+koji_bin=${KOJI_BIN:-/usr/bin/koji}
 
 task_id=$1
 release_id=$2
@@ -59,7 +61,7 @@ get_after_build() {
     # Params:
     # $1: task id
     local task_id=$1
-    after_build=$(koji taskinfo $task_id | grep Build | awk -F' ' '{ print $2 }')
+    after_build=$(${koji_bin} taskinfo $task_id | grep Build | awk -F' ' '{ print $2 }')
     echo -n ${after_build}
 }
 
@@ -74,9 +76,9 @@ get_before_build() {
     local after_build=$1
     local updates_tag=$2
     local package_name=$(get_name_from_nvr $after_build)
-    before_build=$(koji list-tagged --latest --inherit --quiet ${updates_tag} ${package_name} | awk -F' ' '{ print $1 }')
+    before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${updates_tag} ${package_name} | awk -F' ' '{ print $1 }')
     if [ "${before_build}" == "${after_build}" ]; then
-        latest_two=$(koji list-tagged --latest-n 2 --inherit --quiet ${updates_tag} ${package_name} | awk -F' ' '{ print $1 }')
+        latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet ${updates_tag} ${package_name} | awk -F' ' '{ print $1 }')
         for nvr in $latest_two; do
             if [ "${nvr}" != "${after_build}" ]; then
                 before_build=${nvr}

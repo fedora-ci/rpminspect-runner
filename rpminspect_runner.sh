@@ -5,7 +5,7 @@
 #
 # The script recognizes following environment variables:
 # RPMINSPECT_CONFIG - path to the rpminspect config file
-# UPDATES_TAG - koji tag where to look for previous builds
+# PREVIOUS_TAG - koji tag where to look for previous builds
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
@@ -39,7 +39,7 @@ test_name=$3
 
 # Koji tag where to look for previous builds;
 # For example: "f34-updates"
-updates_tag=${UPDATES_TAG:-${release_id}-updates}
+updates_tag=${PREVIOUS_TAG:-${release_id}-updates}
 
 # In case there is no dist tag (like ".fc34") in the package name,
 # rpminspect doesn't know which test configuration to use

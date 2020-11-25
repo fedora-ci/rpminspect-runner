@@ -4,7 +4,7 @@
 # ./rpminspect_runner.sh $TASK_ID $RELEASE_ID $TEST_NAME
 #
 # The script recognizes following environment variables:
-# CONFIG - path to the rpminspect config file
+# RPMINSPECT_CONFIG - path to the rpminspect config file
 # UPDATES_TAG - koji tag where to look for previous builds
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
@@ -30,7 +30,7 @@ fix_rc() {
     exit $retval
 }
 
-config=${CONFIG:-/usr/share/rpminspect/fedora.yaml}
+config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
 koji_bin=${KOJI_BIN:-/usr/bin/koji}
 
 task_id=$1

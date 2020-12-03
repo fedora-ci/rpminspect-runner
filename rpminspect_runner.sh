@@ -101,7 +101,7 @@ mkdir -p ${workdir}
 # Download and cache packages, if not downloaded already
 if [ ! -f ${downloaded_file} ]; then
     rpminspect -c ${config} -v -w ${workdir} -f ${after_build} | grep -v '^Downloading '
-    if [ ${before_build} != ${after_build} ]; then
+    if [ "${before_build}" != "${after_build}" ]; then
         rpminspect -c ${config} -v -w ${workdir} -f ${before_build} | grep -v '^Downloading '
     fi
     touch ${downloaded_file}

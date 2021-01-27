@@ -11,7 +11,6 @@
 # OUTPUT_FORMAT - rpminspect output format (text, json, xunit)
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
-# KOJI_HUB - XML-RPC Koji hub URL (defaults to server line in /etc/koji.conf)
 
 set -e
 PATH=/usr/bin:/usr/sbin
@@ -35,26 +34,6 @@ fix_rc() {
 
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
 koji_bin=${KOJI_BIN:-/usr/bin/koji}
-hub=
-
-# use provided Koji hub or try the one in koji.conf
-if [ -z "${KOJI_HUB}" ]; then
-    [ -f /etc/koji.conf ] && hub="$(grep ^server /etc/koji.conf | awk '{ print $3; }')"
-else
-    hub="${KOJI_HUB}"
-fi
-
-# make sure we have a Koji hub
-if [ -z "${hub}" ]; then
-    echo "*** missing Koji hub" >&2
-    exit 3
-fi
-
-# make sure the Koji hub is up, exit if not
-if ping -q -c 1 -w 15 "${KOJI_HUB}" >/dev/null 2>&1 ; then
-    echo "*** Koji hub '${KOJI_HUB}' is not reachable" >&2
-    exit 4
-fi
 
 task_id=${1}
 previous_tag=${2}
@@ -71,11 +50,7 @@ get_name_from_nvr() {
     # Params:
     # $1: NVR
     nvr=$1
-    kojioutput="$(mktemp)"
-    xmlrpc "${hub}" getBuild s/"${nvr}" > "${kojioutput}"
-    nameline=$(grep -n "'name'$" "${kojioutput}" | cut -d ':' -f 1)
-    name="$(head -n $((nameline + 1)) "${kojioutput}" | tail -n 1 | cut -d "'" -f 2)"
-    rm -f "${kojioutput}"
+    name="$(${koji_bin} call --json-output getBuild "${nvr}" | jq -r '.name')"
     echo -n "${name}"
 }
 

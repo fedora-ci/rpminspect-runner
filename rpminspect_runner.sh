@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# ./rpminspect_runner.sh $TASK_ID $RELEASE_ID $TEST_NAME
+# ./rpminspect_runner.sh $TASK_ID $PREVIOUS_TAG [ $TEST_NAME ]
 #
 # The script recognizes following environment variables:
 # RPMINSPECT_CONFIG - path to the rpminspect config file
@@ -33,17 +33,13 @@ fix_rc() {
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
 koji_bin=${KOJI_BIN:-/usr/bin/koji}
 
-task_id=$1
-release_id=$2
-test_name=$3
-
-# Koji tag where to look for previous builds;
-# For example: "f34-updates"
-updates_tag=${PREVIOUS_TAG:-${release_id}-updates}
+task_id=${1}
+previous_tag=${2}
+test_name=${3}
 
 # In case there is no dist tag (like ".fc34") in the package name,
 # rpminspect doesn't know which test configuration to use
-default_release_string=${DEFAULT_RELEASE_STRING:-${release_id}}
+default_release_string=${DEFAULT_RELEASE_STRING}
 
 
 get_name_from_nvr() {
@@ -67,18 +63,18 @@ get_after_build() {
 
 get_before_build() {
     # Find previous build for given NVR.
-    # The assumption is that the given NVR is not tagged in the "updates_tag".
-    # If the NVR is tagger in the "updates_tag", then it has to be the latest NVR
+    # The assumption is that the given NVR is not tagged in the "previous_tag".
+    # If the NVR is tagger in the "previous_tag", then it has to be the latest NVR
     # for that packages in that tag.
     # Params:
     # $1: NVR
     # $2: Koji tag where to look for older builds
     local after_build=$1
-    local updates_tag=$2
+    local previous_tag=$2
     local package_name=$(get_name_from_nvr $after_build)
-    before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${updates_tag} ${package_name} | awk -F' ' '{ print $1 }')
+    before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
     if [ "${before_build}" == "${after_build}" ]; then
-        latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet ${updates_tag} ${package_name} | awk -F' ' '{ print $1 }')
+        latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
         for nvr in $latest_two; do
             if [ "${nvr}" != "${after_build}" ]; then
                 before_build=${nvr}
@@ -89,39 +85,14 @@ get_before_build() {
     echo -n ${before_build}
 }
 
-
 after_build=$(get_after_build $task_id)
-before_build=$(get_before_build $after_build $updates_tag)
+before_build=$(get_before_build $after_build $previous_tag)
 
-workdir="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}${task_id}-${before_build}"
-downloaded_file=${workdir}/downloaded
+set +e
+rpminspect -c ${config} --format xunit --arches x86_64,noarch,src ${default_release_string:+--release=$default_release_string} ${test_name:+--tests=$test_name} ${before_build} ${after_build} 2> rpminspect_stderr > rpminspect_stdout
+rc=$?
+set -e
 
-mkdir -p ${workdir}
-
-# Download and cache packages, if not downloaded already
-if [ ! -f ${downloaded_file} ]; then
-    rpminspect -c ${config} -v -w ${workdir} -f ${after_build} | grep -v '^Downloading '
-    # Download also the before build, if it exists and is not the same as the after build
-    if [ -n "${before_build}" ] && [ "${before_build}" != "${after_build}" ]; then
-        rpminspect -c ${config} -v -w ${workdir} -f ${before_build} | grep -v '^Downloading '
-    fi
-    touch ${downloaded_file}
-fi
-
-
-if [ -z "${before_build}" ]; then
-    echo "Running rpminspect on ${after_build}. No older builds were found in the \"${updates_tag}\" $(basename ${koji_bin}) tag."
-else
-    echo "Comparing ${after_build} with the older ${before_build} found in the \"${updates_tag}\" $(basename ${koji_bin}) tag."
-fi
-echo
-echo "Test description:"
-
-test_description=$(rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/${test_name}\n/")
-
-echo "${test_description}"
-echo
-echo "======================================== Test Output ========================================"
-
-rpminspect -V
-rpminspect -c ${config} --arches x86_64,noarch,src --release=${default_release_string} --tests=${test_name} ${before_build} ${after_build}
+# Meh... can we do this in the post section of the .fmf file maybe(?)
+cat rpminspect_stdout | base64 -w 0
+exit ${rc}

@@ -5,8 +5,9 @@ This repository contains bits needed to build a container image for [rpminspect]
 
 # Example usage
 
-`rpminspect_runner.sh` has three parameters: \<task-id> \<koji-tag-with-previous-build> [ \<inspection-name> ]
+`rpminspect_runner.sh` has three parameters: `<task-id>` `<koji-tag-with-previous-build>` [ `<inspection-name>` ]
 
 ```shell
-podman run -ti --rm quay.io/fedoraci/rpminspect rpminspect_runner.sh 49176420 f34-updates
+$ podman run -ti --rm quay.io/fedoraci/rpminspect /bin/bash
+(inside container) $ rpminspect_runner.sh 49176420 f34-updates
 ```

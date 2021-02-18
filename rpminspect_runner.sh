@@ -8,6 +8,7 @@
 # PREVIOUS_TAG - koji tag where to look for previous builds
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
+# OUTPUT_FORMAT - rpminspect output format (text, json, xunit)
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
 
@@ -41,6 +42,7 @@ test_name=${3}
 # rpminspect doesn't know which test configuration to use
 default_release_string=${DEFAULT_RELEASE_STRING}
 
+output_format=${OUTPUT_FORMAT}
 
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
@@ -88,4 +90,4 @@ get_before_build() {
 after_build=$(get_after_build $task_id)
 before_build=$(get_before_build $after_build $previous_tag)
 
-rpminspect -c ${config} --format xunit --arches x86_64,noarch,src ${default_release_string:+--release=$default_release_string} ${test_name:+--tests=$test_name} ${before_build} ${after_build} > rpminspect_stdout
+rpminspect -c ${config} ${output_format:+--format=$output_format} --arches x86_64,noarch,src ${default_release_string:+--release=$default_release_string} ${test_name:+--tests=$test_name} ${before_build} ${after_build} > rpminspect_stdout

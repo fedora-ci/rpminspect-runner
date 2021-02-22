@@ -19,6 +19,7 @@ RUN dnf -y install \
     rpminspect-data-fedora-${RPMINSPECT_DATA_VERSION} \
     libabigail \
     koji \
+    xmlrpc-c-apps \
     && dnf clean all
 
 COPY rpminspect_runner.sh /usr/local/bin/

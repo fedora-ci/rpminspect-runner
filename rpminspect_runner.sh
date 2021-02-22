@@ -34,6 +34,7 @@ fix_rc() {
 
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
 koji_bin=${KOJI_BIN:-/usr/bin/koji}
+koji_brand="$(basename "${koji_bin}")"
 
 task_id=${1}
 previous_tag=${2}
@@ -59,7 +60,7 @@ get_after_build() {
     # Params:
     # $1: task id
     task_id=$1
-    after_build=$(${koji_bin} taskinfo "${task_id}" | grep Build | awk -F' ' '{ print $2 }')
+    after_build="$(${koji_bin} call --json-output listBuilds taskId="${task_id}" | jq -r '.[0] .nvr')"
     echo -n "${after_build}"
 }
 

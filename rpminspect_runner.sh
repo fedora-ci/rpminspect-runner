@@ -35,6 +35,7 @@ fix_rc() {
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
 koji_bin=${KOJI_BIN:-/usr/bin/koji}
 koji_brand="$(basename "${koji_bin}")"
+koji_hub="https://koji.fedoraproject.org/kojihub"
 
 task_id=${1}
 previous_tag=${2}
@@ -51,7 +52,9 @@ get_name_from_nvr() {
     # Params:
     # $1: NVR
     nvr=$1
-    name="$(${koji_bin} call --json-output getBuild "${nvr}" | jq -r '.name')"
+    hubout="$(xmlrpc "${koji_hub}" getBuild "${nvr}")"
+    mark="$(echo "${hubout}" | grep -n ": 'name'$" | cut -d ':' -f 1)"
+    name="$(echo "${hubout}" | head -n $((mark + 1)) | tail -n 1 | cut -d "'" -f 2)"
     echo -n "${name}"
 }
 
@@ -60,7 +63,7 @@ get_after_build() {
     # Params:
     # $1: task id
     task_id=$1
-    after_build="$(${koji_bin} call --json-output listBuilds taskId="${task_id}" | jq -r '.[0] .nvr')"
+    after_build="$(${koji_bin} taskinfo "${task_id}" | grep Build | awk -F' ' '{ print $2 }')"
     echo -n "${after_build}"
 }
 

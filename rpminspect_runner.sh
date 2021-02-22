@@ -28,7 +28,7 @@ fix_rc() {
         # something unexpected happened — treat it as an infra error
         exit 2
     fi
-    exit $retval
+    exit ${retval}
 }
 
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
@@ -48,19 +48,20 @@ get_name_from_nvr() {
     # Extract package name (N) from NVR.
     # Params:
     # $1: NVR
-    local nvr=$1
+    nvr=$1
     # Pfff... close your eyes here...
-    name=$(echo $nvr | sed 's/^\(.*\)-\([^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
-    echo -n ${name}
+    # shellcheck disable=SC2001
+    name=$(echo "${nvr}" | sed 's/^\(.*\)-\([^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
+    echo -n "${name}"
 }
 
 get_after_build() {
     # Convert task id to NVR.
     # Params:
     # $1: task id
-    local task_id=$1
-    after_build=$(${koji_bin} taskinfo $task_id | grep Build | awk -F' ' '{ print $2 }')
-    echo -n ${after_build}
+    task_id=$1
+    after_build=$(${koji_bin} taskinfo "${task_id}" | grep Build | awk -F' ' '{ print $2 }')
+    echo -n "${after_build}"
 }
 
 get_before_build() {
@@ -71,12 +72,12 @@ get_before_build() {
     # Params:
     # $1: NVR
     # $2: Koji tag where to look for older builds
-    local after_build=$1
-    local previous_tag=$2
-    local package_name=$(get_name_from_nvr $after_build)
-    before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
+    after_build=$1
+    updates_tag=$2
+    package_name=$(get_name_from_nvr "${after_build}")
+    before_build=$(${koji_bin} list-tagged --latest --inherit --quiet "${updates_tag}" "${package_name}" | awk -F' ' '{ print $1 }')
     if [ "${before_build}" == "${after_build}" ]; then
-        latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
+        latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet "${updates_tag}" "${package_name}" | awk -F' ' '{ print $1 }')
         for nvr in $latest_two; do
             if [ "${nvr}" != "${after_build}" ]; then
                 before_build=${nvr}
@@ -84,7 +85,7 @@ get_before_build() {
             fi
         done
     fi
-    echo -n ${before_build}
+    echo -n "${before_build}"
 }
 
 after_build=$(get_after_build $task_id)

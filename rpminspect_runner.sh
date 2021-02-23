@@ -42,7 +42,7 @@ test_name=${3}
 # rpminspect doesn't know which test configuration to use
 default_release_string=${DEFAULT_RELEASE_STRING}
 
-output_format=${OUTPUT_FORMAT}
+output_format=${OUTPUT_FORMAT:-text}
 
 get_name_from_nvr() {
     # Extract package name (N) from NVR.

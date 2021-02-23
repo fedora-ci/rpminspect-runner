@@ -90,4 +90,10 @@ get_before_build() {
 after_build=$(get_after_build $task_id)
 before_build=$(get_before_build $after_build $previous_tag)
 
-rpminspect -c ${config} ${output_format:+--format=$output_format} --arches x86_64,noarch,src ${default_release_string:+--release=$default_release_string} ${test_name:+--tests=$test_name} ${before_build} ${after_build} > rpminspect_stdout
+rpminspect -c ${config} \
+           ${output_format:+--format=$output_format} \
+           --arches x86_64,noarch,src \
+           ${default_release_string:+--release=$default_release_string} \
+           ${test_name:+--tests=$test_name} \
+           ${before_build} \
+           ${after_build} | tee ${OUTPUT_FILE:-rpminspect_stdout}

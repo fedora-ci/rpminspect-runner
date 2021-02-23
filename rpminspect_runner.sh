@@ -9,6 +9,8 @@
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # OUTPUT_FORMAT - rpminspect output format (text, json, xunit)
+# OUTPUT_FILE - redirect the standard output into a file
+# CONFIG_BRANCH - branch where to look for the package-specific config file
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
 
@@ -22,8 +24,8 @@ fix_rc() {
     # RI_INSPECTION_FAILURE = 1,   /* inspections failed */
     # RI_PROGRAM_ERROR = 2         /* program errored in some way */
     #
-    # These status codes need to be translated into tmt status codes,
-    # so tmt can correctly recognize failures, errors, and successes.
+    # These status codes need to be translated to the TMT status codes,
+    # so TMT can correctly recognize failures, errors, and successes.
     if [ ${retval} -gt 2 ]; then
         # something unexpected happened — treat it as an infra error
         exit 2
@@ -90,10 +92,40 @@ get_before_build() {
 after_build=$(get_after_build $task_id)
 before_build=$(get_before_build $after_build $previous_tag)
 
+
+# obtain package-specific config
+(
+    repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+    repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
+    commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
+
+    tmp_dir=$(mktemp -d -t rpminspect-XXXXXXXXXX)
+
+    pushd ${tmp_dir}
+        git init
+        git remote add origin ${repo_url}
+
+        if [ -n "$CONFIG_BRANCH" ]; then
+            # we take the config from the HEAD of the given branch
+            git fetch origin "refs/heads/${CONFIG_BRANCH}" --depth 1
+            git checkout ${CONFIG_BRANCH}
+        else
+            # we take the config from the build commit
+            git fetch origin
+            git checkout ${commit_ref}
+        fi
+    popd
+
+    # and finally, copy the config to the current directory
+    cp ${tmp_dir}/rpminspect.yaml . || :
+) > clone.log 2>&1
+
+
 rpminspect -c ${config} \
            ${output_format:+--format=$output_format} \
            --arches x86_64,noarch,src \
            ${default_release_string:+--release=$default_release_string} \
            ${test_name:+--tests=$test_name} \
            ${before_build} \
-           ${after_build} | tee ${OUTPUT_FILE:-rpminspect_stdout}
+           ${after_build} \
+           > ${OUTPUT_FILE:-/dev/stdout}

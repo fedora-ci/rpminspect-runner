@@ -9,5 +9,5 @@ This repository contains bits needed to build a container image for [rpminspect]
 
 ```shell
 $ podman run -ti --rm quay.io/fedoraci/rpminspect /bin/bash
-(inside container) $ rpminspect_runner.sh 49176420 f34-updates
+(inside container) $ rpminspect_runner.sh 60499294 f35-updates
 ```

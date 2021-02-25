@@ -133,8 +133,7 @@ print('yes', end='') if is_enabled else print('no', end='')" "${test_name}")
     if [ "${is_enabled}" == "no" ]; then
         echo "\"${test_name}\" inspection is disabled in the package-specific configuration file: ${repo_url} branch/ref: ${CONFIG_BRANCH:-$commit_ref}"
         echo "Skipping..."
-        # 3 means "skipped" in TMT world
-        exit 3
+        exit 0
     fi
 fi
 

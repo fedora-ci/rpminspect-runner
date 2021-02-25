@@ -23,6 +23,6 @@ RUN dnf -y install \
     git \
     && dnf clean all
 
-COPY rpminspect_runner.sh /usr/local/bin/
+COPY rpminspect_runner.sh generate_tmt.sh /usr/local/bin/
 
 WORKDIR ${RPMINSPECT_WORKDIR}

@@ -93,11 +93,11 @@ after_build=$(get_after_build $task_id)
 before_build=$(get_before_build $after_build $previous_tag)
 
 
+repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
+commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
 # obtain a package-specific config file
 if [ ! -f "rpminspect.yaml" ]; then
-    repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
-    repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
-    commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
     (
         tmp_dir=$(mktemp -d -t rpminspect-XXXXXXXXXX)
 
@@ -118,7 +118,7 @@ if [ ! -f "rpminspect.yaml" ]; then
 
         # and finally, copy the config to the current directory;
         # or create an empty one if missing in the repository
-        cp ${tmp_dir}/rpminspect.yaml . || echo "---\ninspections: {}" > rpminspect.yaml
+        cp ${tmp_dir}/rpminspect.yaml . || echo "inspections: {}" > rpminspect.yaml
         rm -Rf "${tmp_dir}"
     ) >> clone.log 2>&1
 fi

@@ -5,6 +5,7 @@
 #
 # The script recognizes following environment variables:
 # RPMINSPECT_CONFIG - path to the rpminspect config file
+# RPMINSPECT_PROFILE_NAME - rpminspect profile to use
 # PREVIOUS_TAG - koji tag where to look for previous builds
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
@@ -45,6 +46,8 @@ test_name=${3}
 default_release_string=${DEFAULT_RELEASE_STRING}
 
 output_format=${OUTPUT_FORMAT:-text}
+
+profile_name=${RPMINSPECT_PROFILE_NAME}
 
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
@@ -123,13 +126,16 @@ if [ ! -f "rpminspect.yaml" ]; then
     ) >> clone.log 2>&1
 fi
 
+if [ -n "$test_name" ]; then
+    # get the effective config file
+    # https://github.com/rpminspect/rpminspect/issues/306
+    rpminspect -c ${config} ${profile_name:+--profile=$profile_name} -D 2>&1 | sed '/==========/,/==========/!d;//d' | sed 's/^    //' > effective_rpminspect.yaml || :
 
-if [ -f "rpminspect.yaml" ] && [ -n "$test_name" ]; then
     is_enabled=$(python3 -c "\
 import yaml; \
 import sys; \
-is_enabled = yaml.safe_load(open('rpminspect.yaml')).get('inspections', {}).get(sys.argv[1], True); \
-print('yes', end='') if is_enabled else print('no', end='')" "${test_name}")
+is_enabled = yaml.safe_load(open(sys.argv[1])).get('inspections', {}).get(sys.argv[2], True); \
+print('yes', end='') if is_enabled else print('no', end='')" "effective_rpminspect.yaml" "${test_name}")
     if [ "${is_enabled}" == "no" ]; then
         echo "\"${test_name}\" inspection is disabled in the package-specific configuration file: ${repo_url} branch/ref: ${CONFIG_BRANCH:-$commit_ref}"
         echo "Skipping..."
@@ -169,11 +175,11 @@ if [ "${output_format}" == "text" ]; then
     echo "======================================== Test Output ========================================"
 fi
 
-
 rpminspect -c ${config} \
            ${output_format:+--format=$output_format} \
            --arches x86_64,noarch,src \
            ${default_release_string:+--release=$default_release_string} \
+           ${profile_name:+--profile=$profile_name} \
            ${test_name:+--tests=$test_name} \
            ${workdir}/${before_build} \
            ${workdir}/${after_build} \

@@ -155,9 +155,9 @@ fi
 # Print nicer output if the output format is "text"
 if [ "${output_format}" == "text" ]; then
     if [ -z "${before_build}" ]; then
-        echo "Running rpminspect on ${after_build}. No older builds were found in the \"${updates_tag}\" $(basename ${koji_bin}) tag."
+        echo "Running rpminspect on ${after_build}. No older builds were found in the \"${previous_tag}\" $(basename ${koji_bin}) tag."
     else
-        echo "Comparing ${after_build} with the older ${before_build} found in the \"${updates_tag}\" $(basename ${koji_bin}) tag."
+        echo "Comparing ${after_build} with the older ${before_build} found in the \"${previous_tag}\" $(basename ${koji_bin}) tag."
     fi
     echo
     echo "Test description:"

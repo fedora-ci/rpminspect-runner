@@ -93,12 +93,11 @@ after_build=$(get_after_build $task_id)
 before_build=$(get_before_build $after_build $previous_tag)
 
 
-# obtain package-specific config
+# obtain a package-specific config file
+repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
+commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
 (
-    repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
-    repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
-    commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
-
     tmp_dir=$(mktemp -d -t rpminspect-XXXXXXXXXX)
 
     pushd ${tmp_dir}
@@ -119,6 +118,21 @@ before_build=$(get_before_build $after_build $previous_tag)
     # and finally, copy the config to the current directory
     cp ${tmp_dir}/rpminspect.yaml . || :
 ) > clone.log 2>&1
+
+
+if [ -f "rpminspect.yaml" ] && [ -n "$test_name" ]; then
+    is_enabled=$(python3 -c "\
+import yaml; \
+import sys; \
+is_enabled = yaml.safe_load(open('rpminspect.yaml')).get('inspections', {}).get(sys.argv[1], True); \
+print('yes', end='') if is_enabled else print('no', end='')" "${test_name}")
+    if [ "${is_enabled}" == "no" ]; then
+        echo "\"${test_name}\" inspection is disabled in the package-specific configuration file: ${repo_ref} branch/ref: ${CONFIG_BRANCH:-$commit_ref}"
+        echo "Skipping..."
+        # 3 means "skipped" in TMT world
+        exit 3
+    fi
+fi
 
 
 rpminspect -c ${config} \

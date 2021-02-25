@@ -26,7 +26,7 @@ fix_rc() {
     #
     # These status codes need to be translated to the TMT status codes,
     # so TMT can correctly recognize failures, errors, and successes.
-    if [ ${retval} -gt 2 ]; then
+    if [ ${retval} -gt 3 ]; then
         # something unexpected happened — treat it as an infra error
         exit 2
     fi

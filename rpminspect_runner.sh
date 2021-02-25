@@ -94,30 +94,34 @@ before_build=$(get_before_build $after_build $previous_tag)
 
 
 # obtain a package-specific config file
-repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
-repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
-commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
-(
-    tmp_dir=$(mktemp -d -t rpminspect-XXXXXXXXXX)
+if [ ! -f "rpminspect.yaml" ]; then
+    repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+    repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
+    commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
+    (
+        tmp_dir=$(mktemp -d -t rpminspect-XXXXXXXXXX)
 
-    pushd ${tmp_dir}
-        git init
-        git remote add origin ${repo_url}
+        pushd ${tmp_dir}
+            git init
+            git remote add origin ${repo_url}
 
-        if [ -n "$CONFIG_BRANCH" ]; then
-            # we take the config from the HEAD of the given branch
-            git fetch origin "refs/heads/${CONFIG_BRANCH}" --depth 1
-            git checkout ${CONFIG_BRANCH}
-        else
-            # we take the config from the build commit
-            git fetch origin
-            git checkout ${commit_ref}
-        fi
-    popd
+            if [ -n "$CONFIG_BRANCH" ]; then
+                # we take the config from the HEAD of the given branch
+                git fetch origin "refs/heads/${CONFIG_BRANCH}" --depth 1
+                git checkout ${CONFIG_BRANCH}
+            else
+                # we take the config from the build commit
+                git fetch origin
+                git checkout ${commit_ref}
+            fi
+        popd
 
-    # and finally, copy the config to the current directory
-    cp ${tmp_dir}/rpminspect.yaml . || :
-) > clone.log 2>&1
+        # and finally, copy the config to the current directory;
+        # or create an empty one if missing in the repository
+        cp ${tmp_dir}/rpminspect.yaml . || echo "---\ninspections: {}" > rpminspect.yaml
+        rm -Rf "${tmp_dir}"
+    ) >> clone.log 2>&1
+fi
 
 
 if [ -f "rpminspect.yaml" ] && [ -n "$test_name" ]; then
@@ -134,12 +138,44 @@ print('yes', end='') if is_enabled else print('no', end='')" "${test_name}")
     fi
 fi
 
+workdir="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}${task_id}-${before_build}"
+downloaded_file=${workdir}/downloaded
+
+mkdir -p ${workdir}
+
+# Download and cache packages, if not downloaded already
+if [ ! -f ${downloaded_file} ]; then
+    rpminspect -c ${config} -v -w ${workdir} -f ${after_build} | grep -v '^Downloading '
+    # Download also the before build, if it exists and is not the same as the after build
+    if [ -n "${before_build}" ] && [ "${before_build}" != "${after_build}" ]; then
+        rpminspect -c ${config} -v -w ${workdir} -f ${before_build} | grep -v '^Downloading '
+    fi
+    touch ${downloaded_file}
+fi
+
+# Print nicer output if the output format is "text"
+if [ "${output_format}" == "text" ]; then
+    if [ -z "${before_build}" ]; then
+        echo "Running rpminspect on ${after_build}. No older builds were found in the \"${updates_tag}\" $(basename ${koji_bin}) tag."
+    else
+        echo "Comparing ${after_build} with the older ${before_build} found in the \"${updates_tag}\" $(basename ${koji_bin}) tag."
+    fi
+    echo
+    echo "Test description:"
+
+    test_description=$(rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/${test_name}\n/")
+
+    echo "${test_description}"
+    echo
+    echo "======================================== Test Output ========================================"
+fi
+
 
 rpminspect -c ${config} \
            ${output_format:+--format=$output_format} \
            --arches x86_64,noarch,src \
            ${default_release_string:+--release=$default_release_string} \
            ${test_name:+--tests=$test_name} \
-           ${before_build} \
-           ${after_build} \
+           ${workdir}/${before_build} \
+           ${workdir}/${after_build} \
            > ${OUTPUT_FILE:-/dev/stdout}

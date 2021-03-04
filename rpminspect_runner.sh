@@ -129,7 +129,7 @@ fi
 if [ -n "$test_name" ]; then
     # get the effective config file
     # https://github.com/rpminspect/rpminspect/issues/306
-    rpminspect -c ${config} ${profile_name:+--profile=$profile_name} -D 2>&1 | sed '/==========/,/==========/!d;//d' | sed 's/^    //' > effective_rpminspect.yaml || :
+    rpminspect -c ${config} ${profile_name:+--profile=$profile_name} -D > effective_rpminspect.yaml || :
 
     is_enabled=$(python3 -c "\
 import yaml; \

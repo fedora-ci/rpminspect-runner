@@ -21,4 +21,4 @@ Push to the master branch triggers new image build in [Quay.io](https://quay.io/
 podman pull quay.io/fedoraci/rpminspect:3d81480
 ```
 
-The tag is always the first 7 letters of the commit hash. However, the image also has the `:latest` tag for convenience.
+The tag is always the first 7 letters of the commit hash (`git rev-parse --short HEAD`). However, the image is also tagged as `:latest`, for convenience.

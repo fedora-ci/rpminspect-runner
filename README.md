@@ -11,3 +11,7 @@ This repository contains bits needed to build a container image for [rpminspect]
 $ podman run -ti --rm quay.io/fedoraci/rpminspect /bin/bash
 (inside container) $ rpminspect_runner.sh 60499294 f35-updates
 ```
+
+## Development
+
+Looking for information on how to make changes to the container image? Take a look [here](./docs/development.md)!

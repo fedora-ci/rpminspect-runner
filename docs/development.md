@@ -15,10 +15,10 @@ See the next section for information on what happens when you merge your changes
 
 # rpminspect-image CI/CD
 
-Push to the master branch triggers new image build in [Quay.io](https://quay.io/repository/fedoraci/rpminspect). Once the build is finished, you can pull the image from the registry:
+Push to the master branch triggers a new image build in [Quay.io](https://quay.io/repository/fedoraci/rpminspect). Once the build is finished, you can pull the image from the registry (replace the image tag):
 
 ```
-podman pull quay.io/fedoraci/rpminspect:3d81480
+$ podman pull quay.io/fedoraci/rpminspect:abf4880
 ```
 
 The tag is always the first 7 letters of the commit hash (`git rev-parse --short HEAD`). However, the image is also tagged as `:latest`, for convenience.

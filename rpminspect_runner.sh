@@ -175,6 +175,12 @@ if [ "${output_format}" == "text" ]; then
     echo "======================================== Test Output ========================================"
 fi
 
+# Update the clamav database
+freshclam
+if [ $? -ne 0 ]; then
+    echo "ERROR: Updating the ClamAV database failed."
+fi
+
 rpminspect -c ${config} \
            ${output_format:+--format=$output_format} \
            --arches x86_64,noarch,src \

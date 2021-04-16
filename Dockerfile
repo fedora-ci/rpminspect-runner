@@ -22,6 +22,7 @@ RUN dnf -y install \
     python3-pyyaml \
     koji \
     git \
+    clamav-update \
     && dnf clean all
 
 COPY rpminspect_runner.sh generate_tmt.sh /usr/local/bin/

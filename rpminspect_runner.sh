@@ -168,7 +168,7 @@ if [ "${output_format}" == "text" ]; then
     echo
     echo "Test description:"
 
-    test_description=$(rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/${test_name}\n/")
+    test_description=$(rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/    ${test_name}\n/")
 
     echo "${test_description}"
     echo

@@ -14,6 +14,7 @@
 # CONFIG_BRANCH - branch where to look for the package-specific config file
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
+# ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
 
 set -e
 
@@ -48,6 +49,8 @@ default_release_string=${DEFAULT_RELEASE_STRING}
 output_format=${OUTPUT_FORMAT:-text}
 
 profile_name=${RPMINSPECT_PROFILE_NAME}
+
+arches=${ARCHES}
 
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
@@ -150,10 +153,10 @@ mkdir -p ${workdir}
 
 # Download and cache packages, if not downloaded already
 if [ ! -f ${downloaded_file} ]; then
-    rpminspect -c ${config} -w ${workdir} -f ${after_build}
+    rpminspect -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${after_build}
     # Download also the before build, if it exists and is not the same as the after build
     if [ -n "${before_build}" ] && [ "${before_build}" != "${after_build}" ]; then
-        rpminspect -c ${config} -w ${workdir} -f ${before_build}
+        rpminspect -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${before_build}
     fi
     touch ${downloaded_file}
 fi
@@ -177,7 +180,7 @@ fi
 
 rpminspect -c ${config} \
            ${output_format:+--format=$output_format} \
-           --arches x86_64,noarch,src \
+           ${arches:+--arches=$arches} \
            ${default_release_string:+--release=$default_release_string} \
            ${profile_name:+--profile=$profile_name} \
            ${test_name:+--tests=$test_name} \

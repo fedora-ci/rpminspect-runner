@@ -157,6 +157,13 @@ downloaded_file=${workdir}/downloaded
 
 mkdir -p ${workdir}
 
+rpminspect_tmp_dir="/var/tmp/rpminspect/"
+# Print information about disk space
+if [ "$debug" == "on" ]; then
+    df -h "${workdir}"
+    du -h -s "${workdir}" "${rpminspect_tmp_dir}" || :
+fi
+
 # Download and cache packages, if not downloaded already
 if [ ! -f ${downloaded_file} ]; then
     rpminspect ${debug:+-v} -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${after_build}
@@ -165,6 +172,12 @@ if [ ! -f ${downloaded_file} ]; then
         rpminspect ${debug:+-v} -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${before_build}
     fi
     touch ${downloaded_file}
+fi
+
+# Print information about disk space
+if [ "$debug" == "on" ]; then
+    df -h "${workdir}"
+    du -h -s "${workdir}" "${rpminspect_tmp_dir}" || :
 fi
 
 # Print nicer output if the output format is "text"

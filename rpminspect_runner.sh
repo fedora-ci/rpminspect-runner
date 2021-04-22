@@ -15,8 +15,14 @@
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
 # ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
+# DEBUG - enable more verbose output (on/off)
+
+if [ "$DEBUG" == "on" ]; then
+    debug=on
+fi
 
 set -e
+${debug:+set -x} \
 
 trap fix_rc EXIT SIGINT SIGSEGV
 fix_rc() {
@@ -132,7 +138,7 @@ fi
 if [ -n "$test_name" ]; then
     # get the effective config file
     # https://github.com/rpminspect/rpminspect/issues/306
-    rpminspect -c ${config} ${profile_name:+--profile=$profile_name} -D > effective_rpminspect.yaml || :
+    rpminspect ${debug:+-v} -c ${config} ${profile_name:+--profile=$profile_name} -D > effective_rpminspect.yaml || :
 
     is_enabled=$(python3 -c "\
 import yaml; \
@@ -153,10 +159,10 @@ mkdir -p ${workdir}
 
 # Download and cache packages, if not downloaded already
 if [ ! -f ${downloaded_file} ]; then
-    rpminspect -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${after_build}
+    rpminspect ${debug:+-v} -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${after_build}
     # Download also the before build, if it exists and is not the same as the after build
     if [ -n "${before_build}" ] && [ "${before_build}" != "${after_build}" ]; then
-        rpminspect -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${before_build}
+        rpminspect ${debug:+-v} -c ${config} ${arches:+--arches=$arches} -w ${workdir} -f ${before_build}
     fi
     touch ${downloaded_file}
 fi
@@ -179,6 +185,7 @@ if [ "${output_format}" == "text" ]; then
 fi
 
 rpminspect -c ${config} \
+           ${debug:+-v} \
            ${output_format:+--format=$output_format} \
            ${arches:+--arches=$arches} \
            ${default_release_string:+--release=$default_release_string} \

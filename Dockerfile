@@ -24,6 +24,6 @@ RUN dnf -y install \
     git \
     && dnf clean all
 
-COPY rpminspect_runner.sh generate_tmt.sh /usr/local/bin/
+COPY *.sh rpminspect_json2text.py /usr/local/bin/
 
 WORKDIR ${RPMINSPECT_WORKDIR}

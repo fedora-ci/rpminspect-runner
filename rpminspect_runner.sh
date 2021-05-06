@@ -138,7 +138,7 @@ if [ ! -f "${results_cached_file}" ]; then
                 -D > effective_rpminspect.yaml || :
     fi
 
-    rpminspect_get_local_config.sh "${after_build}" ""
+    rpminspect_get_local_config.sh "${after_build}"
 
     # Update the virus dababase
     freshclam 2>&1 > freshclam.log || :

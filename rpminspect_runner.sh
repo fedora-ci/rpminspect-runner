@@ -140,6 +140,9 @@ if [ ! -f "${results_cached_file}" ]; then
 
     rpminspect_get_local_config.sh "${after_build}" ""
 
+    # Update the virus dababase
+    freshclam 2>&1 > freshclam.log || :
+
     # Run all inspections and cache results
     rpminspect -c ${config} \
             ${debug:+-v} \

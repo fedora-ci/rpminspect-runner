@@ -19,6 +19,7 @@ RUN dnf -y install \
     rpminspect-${RPMINSPECT_VERSION} \
     rpminspect-data-fedora-${RPMINSPECT_DATA_VERSION} \
     libabigail \
+    clamav-update \
     python3-pyyaml \
     koji \
     git \

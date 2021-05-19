@@ -42,8 +42,6 @@ def process_results(results_json, results_dir):
     with open(results_json) as f:
         inspections = json.load(f)
 
-        inspections.pop('rpminspect')
-
         # Add default "skipped" inspection that will be returned when there are no results
         inspections['skipped'] = [
             {

@@ -132,7 +132,7 @@ if [ ! -f "${results_cached_file}" ]; then
 
     if [ ! -f "effective_rpminspect.yaml" ]; then
         # Get the effective config file
-        rpminspect -c ${config} \
+        /usr/bin/rpminspect -c ${config} \
                 ${debug:+-v} \
                 ${profile_name:+--profile=$profile_name} \
                 -D > effective_rpminspect.yaml || :
@@ -144,7 +144,7 @@ if [ ! -f "${results_cached_file}" ]; then
     freshclam 2>&1 > freshclam.log || :
 
     # Run all inspections and cache results
-    rpminspect -c ${config} \
+    /usr/bin/rpminspect -c ${config} \
             ${debug:+-v} \
             --format=json \
             ${arches:+--arches=$arches} \
@@ -163,7 +163,7 @@ after_build=$(cat "${results_cache_dir}/after_build")
 before_build=$(cat "${results_cache_dir}/before_build")
 
 # Get description for current inspection
-rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/    ${test_name}\n/" | sed -e 's/^[ \t]*//' | tail -n +2 > "${results_cache_dir}/${test_name}_description"
+/usr/bin/rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/    ${test_name}\n/" | sed -e 's/^[ \t]*//' | tail -n +2 > "${results_cache_dir}/${test_name}_description"
 
 echo "rpminspect version: ${RPMINSPECT_VERSION} (with data package: ${RPMINSPECT_DATA_VERSION})"
 echo "rpminspect profile: ${profile_name:-none}"

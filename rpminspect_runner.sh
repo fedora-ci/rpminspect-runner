@@ -143,6 +143,9 @@ if [ ! -f "${results_cached_file}" ]; then
     # Update the virus dababase
     freshclam 2>&1 > freshclam.log || :
 
+    # Update annobin
+    dnf update -y annobin
+
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \
             ${debug:+-v} \

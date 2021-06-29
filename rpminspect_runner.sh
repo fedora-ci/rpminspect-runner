@@ -144,7 +144,7 @@ if [ ! -f "${results_cached_file}" ]; then
     freshclam 2>&1 > freshclam.log || :
 
     # Update annobin
-    dnf update -y annobin
+    dnf update -y annobin 2>&1 > update_annobin.log || :
 
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \

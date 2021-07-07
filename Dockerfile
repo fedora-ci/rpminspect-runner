@@ -16,7 +16,7 @@ RUN dnf -y install 'dnf-command(copr)' && \
     dnf -y copr enable dcantrell/rpminspect
 
 # We enable updates-testing to pull in the latest annobin
-RUN dnf --enablerepo=updates-testing -y install \
+RUN dnf install -y --enablerepo=updates-testing \
     rpminspect-${RPMINSPECT_VERSION} \
     rpminspect-data-fedora-${RPMINSPECT_DATA_VERSION} \
     libabigail \

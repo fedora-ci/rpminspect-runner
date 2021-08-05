@@ -144,7 +144,9 @@ if [ ! -f "${results_cached_file}" ]; then
     freshclam 2>&1 > freshclam.log || :
 
     # Update annobin
-    dnf update -y annobin* 2>&1 > update_annobin.log || :
+    # FIXME: we don't want to touch packages when the base image is Rawhide...
+    #     We can uncomment this once the latest annocheck can be installed from a stable repo.
+    #dnf update -y annobin* 2>&1 > update_annobin.log || :
 
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \

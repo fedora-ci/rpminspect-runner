@@ -173,7 +173,9 @@ before_build=$(cat "${results_cache_dir}/before_build")
 # Get description for current inspection
 /usr/bin/rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/    ${test_name}\n/" | sed -e 's/^[ \t]*//' | tail -n +2 > "${results_cache_dir}/${test_name}_description"
 
-echo "rpminspect version: ${RPMINSPECT_VERSION} (with data package: ${RPMINSPECT_DATA_VERSION})"
+data_version=`rpm -q --qf "%{VERSION}" ${RPMINSPECT_DATA_PACKAGE_NAME}`
+
+echo "rpminspect version: ${RPMINSPECT_VERSION} (with data package: ${data_version})"
 echo "rpminspect profile: ${profile_name:-none}"
 echo "new build: ${after_build}"
 if [ -z "${before_build}" ]; then

@@ -148,8 +148,8 @@ if [ ! -f "${results_cached_file}" ]; then
     #     We can uncomment this once the latest annocheck can be installed from a stable repo.
     #dnf update -y annobin* 2>&1 > update_annobin.log || :
 
-    # Update the data package
-    dnf update -y rpminspect-data* 2>&1 > update_rpminspect_data.log || :
+    # Update the data package, but from COPR, not from the official Fedora repositories
+    dnf update --disablerepo="fedora*" -y rpminspect-data* 2>&1 > update_rpminspect_data.log || :
 
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \

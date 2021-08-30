@@ -39,8 +39,8 @@ def process_results(results_json, results_dir):
     One inspection result per file. Also store the outcome (pass/fail)
     in a separate file.
     """
-    with open(results_json) as f:
-        inspections = json.load(f)
+    with open(results_json, 'rb') as f:
+        inspections = json.loads(f.read().decode('utf-8', 'ignore'))
 
         # Add default "skipped" inspection that will be returned when there are no results
         inspections['skipped'] = [

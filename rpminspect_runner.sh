@@ -141,15 +141,15 @@ if [ ! -f "${results_cached_file}" ]; then
     rpminspect_get_local_config.sh "${after_build}"
 
     # Update the virus dababase
-    freshclam 2>&1 > freshclam.log || :
+    freshclam > freshclam.log 2>&1 || :
 
     # Update annobin
     # FIXME: we don't want to touch packages when the base image is Rawhide...
     #     We can uncomment this once the latest annocheck can be installed from a stable repo.
-    #dnf update -y annobin* 2>&1 > update_annobin.log || :
+    #dnf update -y annobin* > update_annobin.log 2>&1 || :
 
     # Update the data package, but from COPR, not from the official Fedora repositories
-    dnf update --disablerepo="fedora*" -y rpminspect-data* 2>&1 > update_rpminspect_data.log || :
+    dnf update --disablerepo="fedora*" -y rpminspect-data* > update_rpminspect_data.log 2>&1 || :
 
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \

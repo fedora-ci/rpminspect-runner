@@ -26,6 +26,9 @@ RUN dnf install -y --enablerepo=updates-testing \
     git \
     && dnf clean all
 
+# Update the virus database (we also update it when running the inspection)
+RUN freshclam
+
 COPY *.sh rpminspect_json2text.py /usr/local/bin/
 
 WORKDIR ${RPMINSPECT_WORKDIR}

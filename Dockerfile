@@ -3,7 +3,7 @@ LABEL maintainer "Fedora-CI"
 LABEL description="rpminspect for fedora-ci"
 
 # https://copr.fedorainfracloud.org/coprs/dcantrell/rpminspect/
-ENV RPMINSPECT_VERSION=1.9-0.1.202112021505git.fc36
+ENV RPMINSPECT_VERSION=1.9-0.1.202112231810git.fc36
 ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-fedora
 
 ENV RPMINSPECT_WORKDIR=/workdir/

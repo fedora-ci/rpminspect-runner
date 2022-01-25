@@ -77,7 +77,9 @@ print('yes', end='') if is_enabled else print('no', end='')" "effective_rpminspe
     if [ "${is_enabled}" == "no" ]; then
         echo
         echo "This inspection is disabled."
-        exit 0
+
+        # in tmt, this means "no test results found"
+        exit 3
     fi
 }
 

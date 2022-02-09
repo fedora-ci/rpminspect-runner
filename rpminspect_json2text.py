@@ -5,6 +5,33 @@ import argparse
 from pathlib import Path
 
 
+# JSON output uses slightly different names
+# for some of the inspections.
+# FIXME: get rid of this once this is fixed upstream:
+# https://github.com/rpminspect/rpminspect/issues/397
+json2text_mapping = {
+    'empty-payload': 'emptyrpm',
+    'lost-payload': 'lostpayload',
+    'header-metadata': 'metadata',
+    'man-pages': 'manpage',
+    'xml-files': 'xml',
+    'elf-object-properties': 'elf',
+    'desktop-entry-files': 'desktop',
+    'dist-tag': 'disttag',
+    'spec-file-name': 'specname',
+    'java-bytecode': 'javabytecode',
+    'changed-files': 'changedfiles',
+    'moved-files': 'movedfiles',
+    'removed-files': 'removedfiles',
+    'added-files': 'addedfiles',
+    'shell-syntax': 'shellsyntax',
+    'dso-deps': 'dsodeps',
+    'kernel-modules': 'kmod',
+    'architectures': 'arch',
+    'path-migration': 'pathmigration',
+    'bad-functions': 'badfuncs'
+}
+
 
 def process_results(results_json, results_dir):
     """Process rpminspect JSON and split results into individual text files.
@@ -23,7 +50,8 @@ def process_results(results_json, results_dir):
             }
         ]
 
-        for inspection_name, inspection in inspections.items():
+        for inspection_json_name, inspection in inspections.items():
+            inspection_name = json2text_mapping.get(inspection_json_name) or inspection_json_name
 
             result_str = ''
 

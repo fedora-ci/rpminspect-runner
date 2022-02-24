@@ -12,14 +12,8 @@
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
 # ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
-# DEBUG - enable more verbose output (on/off)
-
-if [ "$DEBUG" == "on" ]; then
-    debug=on
-fi
 
 set -e
-${debug:+set -x} \
 
 trap fix_rc EXIT SIGINT SIGSEGV
 fix_rc() {
@@ -133,7 +127,6 @@ if [ ! -f "${results_cached_file}" ]; then
     if [ ! -f "effective_rpminspect.yaml" ]; then
         # Get the effective config file
         /usr/bin/rpminspect -c ${config} \
-                ${debug:+-v} \
                 ${profile_name:+--profile=$profile_name} \
                 -D > effective_rpminspect.yaml || :
     fi
@@ -153,14 +146,16 @@ if [ ! -f "${results_cached_file}" ]; then
 
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \
-            ${debug:+-v} \
             --format=json \
+            --output=results.json \
+            --verbose \
+            --debug \
             ${arches:+--arches=$arches} \
             ${default_release_string:+--release=$default_release_string} \
             ${profile_name:+--profile=$profile_name} \
             ${before_build} \
             ${after_build} \
-            > results.json 2> stderr.log || :
+            2>&1 > debug.log || :
 
     # Convert JSON to text and store results of each inspection to a separate file
     rpminspect_json2text.py "${results_cache_dir}" results.json

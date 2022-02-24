@@ -149,13 +149,12 @@ if [ ! -f "${results_cached_file}" ]; then
             --format=json \
             --output=results.json \
             --verbose \
-            --debug \
             ${arches:+--arches=$arches} \
             ${default_release_string:+--release=$default_release_string} \
             ${profile_name:+--profile=$profile_name} \
             ${before_build} \
             ${after_build} \
-            2>&1 > debug.log || :
+            > verbose.log 2>&1 || :
 
     # Convert JSON to text and store results of each inspection to a separate file
     rpminspect_json2text.py "${results_cache_dir}" results.json

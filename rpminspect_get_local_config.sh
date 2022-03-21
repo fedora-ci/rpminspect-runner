@@ -16,9 +16,9 @@ koji_bin="${KOJI_BIN:-/usr/bin/koji}"
 
 after_build="${1}"
 
-repo_ref=$(${koji_bin} buildinfo ${after_build} | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
-repo_url=$(echo ${repo_ref} | awk -F'#' '{ print $1 }')
-commit_ref=$(echo ${repo_ref} | awk -F'#' '{ print $2 }')
+repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }')
+commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }')
 
 
 find_config_branch() {
@@ -29,7 +29,7 @@ find_config_branch() {
     local release_branch="$1"
     local default_branch="$2"
 
-    for b in $release_branch $default_branch; do
+    for b in "${release_branch}" "${default_branch}"; do
         if [ -n "${b}" ]; then
             # check if branch exists in the remote repository
             git ls-remote --exit-code --heads "${repo_url}" "refs/heads/${b}" > /dev/null 2>&1
@@ -52,25 +52,25 @@ if [ ! -f "rpminspect.yaml" ]; then
 
         tmp_dir=$(mktemp -d -t rpminspect-XXXXXXXXXX)
 
-        pushd ${tmp_dir}
+        pushd "${tmp_dir}"
             git init
-            git remote add origin ${repo_url}
+            git remote add origin "${repo_url}"
 
             if [ -n "${branch}" ]; then
                 # we take the config from the HEAD of the given branch
                 git fetch origin "refs/heads/${branch}" --depth 1
-                git checkout ${branch}
+                git checkout "${branch}"
             else
                 # we take the config from the build commit
                 echo "Config branch doesn't exist, using the commit hash..."
                 git fetch origin
-                git checkout ${commit_ref}
+                git checkout "${commit_ref}"
             fi
         popd
 
         # and finally, copy the config to the current directory;
         # or create an empty one if missing in the repository
-        cp ${tmp_dir}/rpminspect.yaml . || echo "inspections: {}" > rpminspect.yaml
+        cp "${tmp_dir}/rpminspect.yaml" . || echo "inspections: {}" > rpminspect.yaml
         rm -Rf "${tmp_dir}"
     ) >> clone.log 2>&1
 fi

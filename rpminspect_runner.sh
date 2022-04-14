@@ -156,6 +156,7 @@ if [ ! -f "${results_cached_file}" ]; then
             --format=json \
             --output=results.json \
             --verbose \
+            --suppress=VERIFY \
             ${arches:+--arches=$arches} \
             ${default_release_string:+--release=$default_release_string} \
             ${profile_name:+--profile=$profile_name} \

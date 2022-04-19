@@ -64,8 +64,10 @@ def process_results(results_json, results_dir):
 
                 outcome = result.get('result', '')
                 if outcome:
-                    if outcome in ('OK', 'INFO'):
+                    if outcome in ('OK', 'INFO') and inspection_name != 'diagnostics':
                         # Let's filter out OK/INFO results so the output is more readable
+                        # "diagnostics" is a special inspection which prints information
+                        # about rpminspect and its dependencies, so let's keep that
                         continue
 
                     result_str += f"Result: {outcome}\n"

@@ -62,14 +62,18 @@ def process_results(results_json, results_dir):
             outcomes = set()
             for index, result in enumerate(inspection):
 
+                outcome = result.get('result', '')
+                if outcome:
+                    if outcome in ('OK', 'INFO'):
+                        # Let's filter out OK/INFO results so the output is more readable
+                        continue
+
+                    result_str += f"Result: {outcome}\n"
+                    outcomes.add(outcome)
+
                 message = result.get('message', '')
                 if message:
                     result_str += f"{index+1}) {message}\n\n"
-
-                outcome = result.get('result', '')
-                if outcome:
-                    result_str += f"Result: {outcome}\n"
-                    outcomes.add(outcome)
 
                 waiver_auth = result.get('waiver authorization', '')
                 if waiver_auth:

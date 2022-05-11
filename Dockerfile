@@ -3,7 +3,7 @@ LABEL maintainer "Fedora-CI"
 LABEL description="rpminspect for fedora-ci"
 
 # https://copr.fedorainfracloud.org/coprs/dcantrell/rpminspect/
-ENV RPMINSPECT_VERSION=1.10-0.1.202204291856git.fc37
+ENV RPMINSPECT_PACKAGE_NAME=rpminspect
 ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-fedora
 
 ENV RPMINSPECT_WORKDIR=/workdir/
@@ -17,7 +17,7 @@ RUN dnf -y install 'dnf-command(copr)' && \
 
 # We enable updates-testing to pull in the latest annobin
 RUN dnf install -y --enablerepo=updates-testing \
-    rpminspect-${RPMINSPECT_VERSION} \
+    ${RPMINSPECT_PACKAGE_NAME} \
     ${RPMINSPECT_DATA_PACKAGE_NAME} \
     libabigail \
     clamav-update \

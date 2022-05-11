@@ -2,16 +2,7 @@
 
 ## How to update rpminspect
 
-There is a variable in the [Dockerfile](./Dockerfile) that controls which version of `rpminspect` is installed inside the container image:
-
-```shell
-# https://copr.fedorainfracloud.org/coprs/dcantrell/rpminspect/
-ENV RPMINSPECT_VERSION=1.10-0.1.202203231925git.fc37
-```
-
-In order to upgrade/downgrade `rpminspect`, all you need to do is to update the corresponding version in the Dockerfile.
-
-See the next section for information on what happens when you merge your changes to the master branch.
+The runner script tries to update rpminspect (and data package) to the latest version every time it runs.
 
 
 ## How to build and run the container image locally

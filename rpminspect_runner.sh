@@ -149,7 +149,7 @@ if [ ! -f "${results_cached_file}" ]; then
     #dnf update -y annobin* > update_annobin.log 2>&1 || :
 
     # Update the data package, but from COPR, not from the official Fedora repositories
-    dnf update --disablerepo="fedora*" -y rpminspect-data* > update_rpminspect_data.log 2>&1 || :
+    dnf update --disablerepo="fedora*" -y ${RPMINSPECT_PACKAGE_NAME} ${RPMINSPECT_DATA_PACKAGE_NAME} > update_rpminspect.log 2>&1 || :
 
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \
@@ -174,9 +174,10 @@ before_build=$(cat "${results_cache_dir}/before_build")
 # Get description for current inspection
 /usr/bin/rpminspect -l -v | awk -v RS= -v ORS='\n\n' "/    ${test_name}\n/" | sed -e 's/^[ \t]*//' | tail -n +2 > "${results_cache_dir}/${test_name}_description"
 
+rpminspect_version=`rpm -q --qf "%{VERSION}-%{RELEASE}" ${RPMINSPECT_PACKAGE_NAME}`
 data_version=`rpm -q --qf "%{VERSION}-%{RELEASE}" ${RPMINSPECT_DATA_PACKAGE_NAME}`
 
-echo "rpminspect version: ${RPMINSPECT_VERSION} (with data package: ${data_version})"
+echo "rpminspect version: ${rpminspect_version} (with data package: ${data_version})"
 echo "rpminspect profile: ${profile_name:-none}"
 echo "new build: ${after_build}"
 if [ -z "${before_build}" ]; then

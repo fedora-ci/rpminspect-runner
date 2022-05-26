@@ -80,7 +80,7 @@ get_after_build() {
     # Params:
     # $1: task id
     local task_id=$1
-    after_build=$(basename $(koji taskinfo -v -r "$task_id" | grep "SRPM: " | head -1 | awk '{ print $2 }' | sed 's|\.src.rpm$||g'))
+    after_build=$(basename $("$koji_bin" taskinfo -v -r "$task_id" | grep "SRPM: " | head -1 | awk '{ print $2 }' | sed 's|\.src.rpm$||g'))
     echo -n ${after_build}
 }
 

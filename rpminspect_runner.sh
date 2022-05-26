@@ -80,7 +80,7 @@ get_after_build() {
     # Params:
     # $1: task id
     local task_id=$1
-    after_build=$(${koji_bin} taskinfo $task_id | grep Build | awk -F' ' '{ print $2 }')
+    after_build=$(basename $(koji taskinfo -v -r "$task_id" | grep "SRPM: " | head -1 | awk '{ print $2 }' | sed 's|\.src.rpm$||g'))
     echo -n ${after_build}
 }
 
@@ -160,7 +160,7 @@ if [ ! -f "${results_cached_file}" ]; then
             ${default_release_string:+--release=$default_release_string} \
             ${profile_name:+--profile=$profile_name} \
             ${before_build} \
-            ${after_build} \
+            ${task_id} \
             > verbose.log 2>&1 || :
 
     # Convert JSON to text and store results of each inspection to a separate file

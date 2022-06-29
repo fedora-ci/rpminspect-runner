@@ -66,6 +66,7 @@ def process_results(results_json, results_dir):
             outcomes.discard('OK')
             outcomes.discard('INFO')
             outcomes.discard('WAIVED')
+            outcomes.discard('DIAGNOSTICS')
 
             status = 0  # success
             # the outcomes set should be empty now,

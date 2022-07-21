@@ -12,6 +12,8 @@
 # RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
 # ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
+# IS_MODULE - "yes" if the given TASK_ID is a module task ID from MBS
+# MBS_API_URL - Module Build System (MBS) API URL
 
 set -e
 
@@ -47,6 +49,8 @@ profile_name=${RPMINSPECT_PROFILE_NAME}
 
 arches=${ARCHES}
 
+is_module="${IS_MODULE}"
+
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
     # Params:
@@ -54,6 +58,15 @@ get_name_from_nvr() {
     local nvr=$1
     # Pfff... close your eyes here...
     name=$(echo $nvr | sed 's/^\(.*\)-\([^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
+    echo -n ${name}
+}
+
+get_ns_from_module_nvr() {
+    # Extract "module_name-stream" (ns) from NVR.
+    # Params:
+    # $1: NVR
+    local nvr=$1
+    name=$(echo $nvr | sed 's/^\(.*[^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
     echo -n ${name}
 }
 
@@ -115,6 +128,36 @@ get_before_build() {
     echo -n ${before_build}
 }
 
+get_before_module_build() {
+    # Find previous module build for given NVR.
+    # The assumption is that the given NVR is not tagged in the "previous_tag".
+    # If the NVR is tagger in the "previous_tag", then it has to be the latest NVR
+    # for that module in that tag.
+    # Params:
+    # $1: NVR
+    # $2: Koji tag where to look for older builds
+    local after_build=$1
+    local previous_tag=$2
+    local name=$(get_name_from_nvr $after_build)
+    local name_stream=$(get_ns_from_module_nvr $after_build)
+    # TODO: it would be better to actually compare NVRs instead of assuming that the last NVR in the list is the latest...
+    before_build=$(${koji_bin} list-tagged --inherit --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -1)
+
+    if [ "${before_build}" == "${after_build}" ]; then
+        # Reset $before_build so we can return an empty string if no previous builds are found
+        before_build=''
+
+        # Get the latest-1 NVR
+        before_build_candidate=$(${koji_bin} list-tagged --inherit --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -2 | head -1)
+        if [ "${before_build_candidate}" != "${after_build}" ]; then
+                before_build=${before_build_candidate}
+        fi
+    fi
+
+    # Provide either an empty string or the previous build
+    echo -n ${before_build}
+}
+
 workdir="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}${task_id}-${before_build}"
 results_cache_dir="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}results_cache"
 results_cached_file="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}cached"
@@ -122,11 +165,25 @@ results_cached_file="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}cached"
 mkdir -p ${workdir}
 mkdir -p "${results_cache_dir}"
 
+after_build_param="${task_id}"
 
 # cache results — the following section should run in CI only once
 if [ ! -f "${results_cached_file}" ]; then
-    after_build=$(get_after_build $task_id)
-    before_build=$(get_before_build $after_build $previous_tag)
+    if [ "${is_module}" == "yes" ]; then
+
+        module_info=$(curl "${MBS_API_URL}/module-build-service/1/module-builds/${task_id}")
+        name=$(echo "${module_info}" | jq -r .name)
+        stream=$(echo "${module_info}" | jq -r .stream)
+        version=$(echo "${module_info}" | jq -r .version)
+        context=$(echo "${module_info}" | jq -r .context)
+        after_build="${name}-${stream}-${version}.${context}"
+
+        before_build=$(get_before_module_build "${after_build}" "${previous_tag}")
+        after_build_param="${after_build}"
+    else
+        after_build=$(get_after_build "${task_id}")
+        before_build=$(get_before_build "${after_build}" "${previous_tag}")
+    fi
 
     echo -n "${after_build}" > "${results_cache_dir}/after_build"
     echo -n "${before_build}" > "${results_cache_dir}/before_build"
@@ -160,7 +217,7 @@ if [ ! -f "${results_cached_file}" ]; then
             ${default_release_string:+--release=$default_release_string} \
             ${profile_name:+--profile=$profile_name} \
             ${before_build} \
-            ${task_id} \
+            ${after_build_param} \
             > verbose.log 2>&1 || :
 
     # Convert JSON to text and store results of each inspection to a separate file

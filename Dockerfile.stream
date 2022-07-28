@@ -29,12 +29,11 @@ RUN dnf install -y \
     centpkg \
     && dnf clean all
 
-# Update the virus database (we also update it when running the inspection)
+# Update the virus database (we also update it when running the "virus" inspection)
 RUN freshclam
 
 COPY rpminspect_zuul_runner.sh ${RPMINSPECT_RUNNER_DIR}/
 COPY scripts ${RPMINSPECT_RUNNER_DIR}/scripts
-COPY rpminspect_json2text.py ${RPMINSPECT_RUNNER_DIR}/scripts/
 COPY configs ${RPMINSPECT_RUNNER_DIR}/configs
 
 RUN ln -s ${RPMINSPECT_RUNNER_DIR}/rpminspect_zuul_runner.sh /usr/local/bin/rpminspect_zuul_runner.sh

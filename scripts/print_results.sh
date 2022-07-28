@@ -3,8 +3,8 @@
 set -e
 
 test_name="${1}"
-here_dir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
-results_cache_dir="${RPMINSPECT_WORKDIR:-${here_dir}}/results_cache"
+script_dir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+results_cache_dir="${RPMINSPECT_WORKDIR:-${PWD}}/results_cache"
 
 
 trap fix_rc EXIT SIGINT SIGSEGV
@@ -18,7 +18,7 @@ fix_rc() {
     # These status codes need to be translated to the TMT status codes,
     # so TMT can correctly recognize failures, errors, and successes.
     if [ ${retval} -gt 3 ]; then
-        # something unexpected happened — treat it as an infra error
+        # something unexpected happened — treat it as infra error
         exit 2
     fi
     exit $retval

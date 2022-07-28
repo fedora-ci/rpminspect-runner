@@ -1,5 +1,7 @@
 *.log
+logs/
 cache/
 scripts/cache/
 scripts/results_cache/
 results.json
+rpminspect.yaml

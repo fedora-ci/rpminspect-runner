@@ -63,6 +63,7 @@ def process_results(results_json, results_dir):
                 result_str += '\n\n'
 
             # remove all good outcomes
+            outcomes.discard('SKIP')
             outcomes.discard('OK')
             outcomes.discard('INFO')
             outcomes.discard('WAIVED')

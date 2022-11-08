@@ -53,6 +53,10 @@ is_module="${IS_MODULE}"
 
 tests="${TESTS}"
 
+# support running out of git tree
+MYDIR="$(dirname $(realpath "$0"))"
+export PATH="$PATH:$MYDIR:$MYDIR/scripts"
+
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
     # Params:

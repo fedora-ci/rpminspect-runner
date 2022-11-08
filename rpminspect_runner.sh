@@ -228,6 +228,26 @@ fi
 after_build=$(cat "${results_cache_dir}/after_build")
 before_build=$(cat "${results_cache_dir}/before_build")
 
+case $rc in
+    0) tmtresult="pass" ;;
+    1) tmtresult="fail" ;;
+    *) tmtresult="error" ;;
+esac
+
+# when running through TMT, create custom results.yaml to include extra logs
+# TODO: add duration: 00:11:22
+if [ -n "$TMT_TEST_DATA" ]; then
+    cat <<EOF > "$TMT_TEST_DATA/results.yaml"
+- name: /rpminspect
+  result: $tmtresult
+  log:
+    - data/rpminspect/output.txt
+    - data/rpminspect/data/verbose.log
+    - data/rpminspect/data/result.json
+EOF
+    echo "running in TMT, wrote $TMT_TEST_DATA/results.yaml"
+fi
+
 rpminspect_version=`rpm -q --qf "%{VERSION}-%{RELEASE}" ${RPMINSPECT_PACKAGE_NAME}`
 data_version=`rpm -q --qf "%{VERSION}-%{RELEASE}" ${RPMINSPECT_DATA_PACKAGE_NAME}`
 
@@ -242,5 +262,5 @@ else
     echo "old build: ${before_build} (found in ${previous_tag} $(basename ${koji_bin}) tag)"
 fi
 echo
-echo "rpminspect exited with status code $rc"
+echo "rpminspect exited with status code $rc ($tmtresult)"
 exit $rc

@@ -14,6 +14,7 @@
 # ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
 # IS_MODULE - "yes" if the given TASK_ID is a module task ID from MBS
 # MBS_API_URL - Module Build System (MBS) API URL
+# TESTS - a comma-separated list of inspections to run
 
 set -e
 
@@ -50,6 +51,8 @@ profile_name=${RPMINSPECT_PROFILE_NAME}
 arches=${ARCHES}
 
 is_module="${IS_MODULE}"
+
+tests="${TESTS}"
 
 get_name_from_nvr() {
     # Extract package name (N) from NVR.
@@ -216,6 +219,7 @@ if [ ! -f "${results_cached_file}" ]; then
             ${arches:+--arches=$arches} \
             ${default_release_string:+--release=$default_release_string} \
             ${profile_name:+--profile=$profile_name} \
+            ${tests:+--tests=$tests} \
             ${before_build} \
             ${after_build_param} \
             > verbose.log 2>&1 || :

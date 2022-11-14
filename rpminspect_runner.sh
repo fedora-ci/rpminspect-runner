@@ -170,6 +170,8 @@ mkdir -p "${results_cache_dir}"
 
 after_build_param="${task_id}"
 
+before_build=''
+
 # cache results — the following section should run in CI only once
 if [ ! -f "${results_cached_file}" ]; then
     if [ "${is_module}" == "yes" ]; then
@@ -181,11 +183,15 @@ if [ ! -f "${results_cached_file}" ]; then
         context=$(echo "${module_info}" | jq -r .context)
         after_build="${name}-${stream}-${version}.${context}"
 
-        before_build=$(get_before_module_build "${after_build}" "${previous_tag}")
+        if [ -n "$previous_tag" ]; then
+            before_build=$(get_before_module_build "${after_build}" "${previous_tag}")
+        fi
         after_build_param="${after_build}"
     else
         after_build=$(get_after_build "${task_id}")
-        before_build=$(get_before_build "${after_build}" "${previous_tag}")
+        if [ -n "$previous_tag" ]; then
+            before_build=$(get_before_build "${after_build}" "${previous_tag}")
+        fi
     fi
 
     echo -n "${after_build}" > "${results_cache_dir}/after_build"
@@ -242,7 +248,9 @@ echo "rpminspect version: ${rpminspect_version} (with data package: ${data_versi
 echo "rpminspect profile: ${profile_name:-none}"
 echo "new build: ${after_build}"
 if [ -z "${before_build}" ]; then
-    echo "old build: not found (in ${previous_tag} $(basename ${koji_bin}) tag)"
+    if [ -n "${previous_tag}" ]; then
+        echo "old build: not found (in ${previous_tag} $(basename ${koji_bin}) tag)"
+    fi
 else
     echo "old build: ${before_build} (found in ${previous_tag} $(basename ${koji_bin}) tag)"
 fi

@@ -6,12 +6,6 @@ LABEL description="rpminspect for fedora-ci"
 ENV RPMINSPECT_PACKAGE_NAME=rpminspect
 ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-fedora
 
-ENV RPMINSPECT_WORKDIR=/workdir/
-ENV HOME=${RPMINSPECT_WORKDIR}
-
-RUN mkdir -p ${RPMINSPECT_WORKDIR} &&\
-    chmod 777 ${RPMINSPECT_WORKDIR}
-
 RUN dnf -y install 'dnf-command(copr)' && \
     dnf -y copr enable dcantrell/rpminspect
 
@@ -31,5 +25,3 @@ RUN dnf install -y --enablerepo=updates-testing \
 RUN freshclam
 
 COPY *.sh scripts/rpminspect_json2text.py /usr/local/bin/
-
-WORKDIR ${RPMINSPECT_WORKDIR}

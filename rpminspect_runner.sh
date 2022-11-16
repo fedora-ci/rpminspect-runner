@@ -9,7 +9,6 @@
 # PREVIOUS_TAG - koji tag where to look for previous builds
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
-# RPMINSPECT_WORKDIR - workdir where to cache downloaded builds
 # KOJI_BIN - path where to find "koji" binary
 # ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
 # IS_MODULE - "yes" if the given TASK_ID is a module task ID from MBS
@@ -161,11 +160,10 @@ get_before_module_build() {
     echo -n ${before_build}
 }
 
-workdir="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}${task_id}-${before_build}"
-results_cache_dir="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}results_cache"
-results_cached_file="${RPMINSPECT_WORKDIR:-/var/tmp/rpminspect/}cached"
+# This is where we will cache rpminspect results, so we can later just return them if they already exist
+results_cache_dir="${PWD}/cache_dir"
+results_cached_file="${results_cache_dir}cached"
 
-mkdir -p ${workdir}
 mkdir -p "${results_cache_dir}"
 
 after_build_param="${task_id}"
@@ -217,10 +215,15 @@ if [ ! -f "${results_cached_file}" ]; then
     # Update the data package, but from COPR, not from the official Fedora repositories
     dnf update --disablerepo="fedora*" -y ${RPMINSPECT_PACKAGE_NAME} ${RPMINSPECT_DATA_PACKAGE_NAME} > update_rpminspect.log 2>&1 || :
 
+    output_filename=results.json
+    # Workdir used by rpminspect
+    workdir="${PWD}/workdir/"
+    mkdir -p "${workdir}"
     # Run all inspections and cache results
     /usr/bin/rpminspect -c ${config} \
+            --workdir "${workdir}" \
             --format=json \
-            --output=results.json \
+            --output="${output_filename}" \
             --verbose \
             ${arches:+--arches=$arches} \
             ${default_release_string:+--release=$default_release_string} \
@@ -230,9 +233,17 @@ if [ ! -f "${results_cached_file}" ]; then
             ${after_build_param} \
             > verbose.log 2>&1 || :
 
-    # Convert JSON to text and store results of each inspection to a separate file
-    rpminspect_json2text.py "${results_cache_dir}" results.json
-    touch "${results_cached_file}"
+    rm -Rf "${workdir}"
+
+    if [ -f "${output_filename}" ]; then
+        # Convert JSON to text and store results of each inspection to a separate file
+        rpminspect_json2text.py "${results_cache_dir}" "${output_filename}"
+        touch "${results_cached_file}"
+    else
+        # rpminspect probably crashed... let's just show the verbose.log
+        cat verbose.log
+        exit 123  # error
+    fi
 fi
 
 after_build=$(cat "${results_cache_dir}/after_build")

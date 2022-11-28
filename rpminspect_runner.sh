@@ -237,11 +237,17 @@ esac
 # when running through TMT, create custom results.yaml to include extra logs
 # TODO: add duration: 00:11:22
 if [ -n "$TMT_TEST_DATA" ]; then
+    # get rpminspect's results viewer
+    curl --silent --show-error --fail --retry 5 \
+        --output "$TMT_TEST_DATA/viewer.html" \
+        https://raw.githubusercontent.com/rpminspect/rpminspect/main/contrib/viewer.html
+
     cat <<EOF > "$TMT_TEST_DATA/results.yaml"
 - name: /rpminspect
   result: $tmtresult
   log:
     - data/rpminspect/output.txt
+    - data/rpminspect/data/viewer.html
     - data/rpminspect/data/verbose.log
     - data/rpminspect/data/result.json
 EOF

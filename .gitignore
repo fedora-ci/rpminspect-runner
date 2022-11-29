@@ -3,5 +3,5 @@ logs/
 cache/
 scripts/cache/
 scripts/results_cache/
-results.json
+result.json
 rpminspect.yaml

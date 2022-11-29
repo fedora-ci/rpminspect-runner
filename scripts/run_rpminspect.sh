@@ -21,7 +21,7 @@ cat rpminspect.yaml || :
 
 "${RPMINSPECT_BIN}" \
     --format=json \
-    --output=results.json \
+    --output=result.json \
     --verbose \
     ${RPMINSPECT_PROFILE:+--profile=$RPMINSPECT_PROFILE} \
     ${RPMINSPECT_DEFAULT_RELEASE_STRING:+--release=$RPMINSPECT_DEFAULT_RELEASE_STRING} \
@@ -29,6 +29,6 @@ cat rpminspect.yaml || :
     "${after_build_dir}" || :
 
 # Convert JSON to text and store results of each inspection to a separate file
-if [ -f "results.json" ]; then
-    python3 "${script_dir}/rpminspect_json2text.py" "${results_cache_dir}" results.json
+if [ -f "result.json" ]; then
+    python3 "${script_dir}/rpminspect_json2text.py" "${results_cache_dir}" result.json
 fi

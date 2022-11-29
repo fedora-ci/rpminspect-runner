@@ -219,7 +219,7 @@ if [ ! -f "${results_cached_file}" ]; then
     # Update the data package, but from COPR, not from the official Fedora repositories
     dnf update --disablerepo="fedora*" -y ${RPMINSPECT_PACKAGE_NAME} ${RPMINSPECT_DATA_PACKAGE_NAME} > update_rpminspect.log 2>&1 || :
 
-    output_filename=results.json
+    output_filename=result.json
     # Workdir used by rpminspect
     workdir="${PWD}/workdir/"
     mkdir -p "${workdir}"

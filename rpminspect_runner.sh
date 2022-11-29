@@ -219,7 +219,8 @@ if [ ! -f "${results_cached_file}" ]; then
     # Update the data package, but from COPR, not from the official Fedora repositories
     dnf update --disablerepo="fedora*" -y ${RPMINSPECT_PACKAGE_NAME} ${RPMINSPECT_DATA_PACKAGE_NAME} > update_rpminspect.log 2>&1 || :
 
-    output_filename=result.json
+    output_filename=${TMT_TEST_DATA:-.}/result.json
+    verbose_log=${TMT_TEST_DATA:-.}/verbose.log
     # Workdir used by rpminspect
     workdir="${PWD}/workdir/"
     mkdir -p "${workdir}"
@@ -235,7 +236,7 @@ if [ ! -f "${results_cached_file}" ]; then
             ${tests:+--tests=$tests} \
             ${before_build} \
             ${after_build_param} \
-            > verbose.log 2>&1 || :
+            > $verbose_log 2>&1 || :
 
     rm -Rf "${workdir}"
 
@@ -245,7 +246,7 @@ if [ ! -f "${results_cached_file}" ]; then
         touch "${results_cached_file}"
     else
         # rpminspect probably crashed... let's just show the verbose.log
-        cat verbose.log
+        cat $verbose_log
         exit 123  # error
     fi
 fi

@@ -251,6 +251,11 @@ if [ -n "$TMT_TEST_DATA" ]; then
     - data/rpminspect/data/verbose.log
     - data/rpminspect/data/result.json
 EOF
+    # if dist-git uses a custom rpminspect config, add that as an artifact as well
+    if [ -e rpminspect.yaml ]; then
+        cp rpminspect.yaml "$TMT_TEST_DATA"
+        echo "    - data/rpminspect/data/rpminspect.yaml" >> "$TMT_TEST_DATA/results.yaml"
+    fi
     echo "running in TMT, wrote $TMT_TEST_DATA/results.yaml"
 fi
 

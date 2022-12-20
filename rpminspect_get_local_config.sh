@@ -70,7 +70,7 @@ if [ ! -f "rpminspect.yaml" ]; then
 
         # and finally, copy the config to the current directory;
         if [ -f "${tmp_dir}/rpminspect.yaml" ]; then
-            cp cp "${tmp_dir}/rpminspect.yaml" .
+            cp "${tmp_dir}/rpminspect.yaml" .
         fi
         rm -Rf "${tmp_dir}"
     ) >> clone.log 2>&1

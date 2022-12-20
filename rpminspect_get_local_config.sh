@@ -69,8 +69,9 @@ if [ ! -f "rpminspect.yaml" ]; then
         popd
 
         # and finally, copy the config to the current directory;
-        # or create an empty one if missing in the repository
-        cp "${tmp_dir}/rpminspect.yaml" . || echo "inspections: {}" > rpminspect.yaml
+        if [ -f "${tmp_dir}/rpminspect.yaml" ]; then
+            cp cp "${tmp_dir}/rpminspect.yaml" .
+        fi
         rm -Rf "${tmp_dir}"
     ) >> clone.log 2>&1
 fi

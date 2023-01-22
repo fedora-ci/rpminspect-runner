@@ -202,7 +202,14 @@ output_filename=${TMT_TEST_DATA:-.}/result.json
 verbose_log=${TMT_TEST_DATA:-.}/verbose.log
 # Workdir used by rpminspect
 workdir="${PWD}/workdir/"
-mkdir -p "${workdir}"
+# Temp dir should be inside the container's default workdir; The default workdir can be a mounted volume,
+# which can provide better IO performance under certain circumstances.
+tmpdir="${PWD}/tempfiles/"
+mkdir -p "${workdir}" "${tmpdir}"
+
+# Virus inspection is a heavy user of the temp dir
+export TMPDIR="${tmpdir}"
+
 # Run all inspections
 rc=0
 /usr/bin/rpminspect -c ${config} \
@@ -219,6 +226,7 @@ rc=0
         > $verbose_log 2>&1 || rc=$?
 
 rm -Rf "${workdir}"
+rm -Rf "${tmpdir}"
 
 if [ $rc -gt 1 ]; then
     # rpminspect probably crashed... let's show the verbose.log

@@ -14,6 +14,7 @@
 # IS_MODULE - "yes" if the given TASK_ID is a module task ID from MBS
 # MBS_API_URL - Module Build System (MBS) API URL
 # TESTS - a comma-separated list of inspections to run
+# CLAMAV_DATABASE_MIRROR_URL - if set, use this mirror to update the clamav database
 
 set -e
 
@@ -151,6 +152,19 @@ get_before_module_build() {
     echo -n ${before_build}
 }
 
+
+update_clamav_database() {
+    # Update the virus dababase
+    config_file="freshclam.conf"
+    cp "/etc/$config_file" .
+    if [ -n "$CLAMAV_DATABASE_MIRROR_URL" ]; then
+        sed -i "s|^DatabaseMirror .*|DatabaseMirror $CLAMAV_DATABASE_MIRROR_URL|" "$config_file"
+    fi
+
+    freshclam --config-file="$config_file" > freshclam.log 2>&1 || :
+}
+
+
 after_build_param="${task_id}"
 
 before_build=''
@@ -187,8 +201,7 @@ fi
 
 rpminspect_get_local_config.sh "${after_build}"
 
-# Update the virus dababase
-freshclam > freshclam.log 2>&1 || :
+update_clamav_database
 
 # Update annobin
 # FIXME: we don't want to touch packages when the base image is Rawhide...

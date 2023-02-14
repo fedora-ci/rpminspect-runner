@@ -225,7 +225,11 @@ export TMPDIR="${tmpdir}"
 
 # Run all inspections
 rc=0
-/usr/bin/rpminspect -c ${config} \
+
+(
+    set -x
+    rpm -qa | grep rpminspect
+    /usr/bin/rpminspect -c ${config} \
         --workdir "${workdir}" \
         --format=json \
         --output="${output_filename}" \
@@ -235,8 +239,8 @@ rc=0
         ${profile_name:+--profile=$profile_name} \
         ${tests:+--tests=$tests} \
         ${before_build} \
-        ${after_build_param} \
-        > $verbose_log 2>&1 || rc=$?
+        ${after_build_param}
+) > "$verbose_log" 2>&1 || rc=$?
 
 rm -Rf "${workdir}"
 rm -Rf "${tmpdir}"

@@ -227,7 +227,9 @@ export TMPDIR="${tmpdir}"
 rc=0
 
 (
+    echo "Checking the component-specific rpminspect.yaml..."
     set -x
+    cat rpminspect.yaml || :
     rpm -qa | grep rpminspect
     /usr/bin/rpminspect -c ${config} \
         --workdir "${workdir}" \

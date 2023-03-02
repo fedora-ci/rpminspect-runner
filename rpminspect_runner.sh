@@ -192,14 +192,18 @@ fi
 echo -n "${after_build}" > "${results_cache_dir}/after_build"
 echo -n "${before_build}" > "${results_cache_dir}/before_build"
 
+repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }')
+commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }')
+
+fetch-my-yaml.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
+
 if [ ! -f "effective_rpminspect.yaml" ]; then
     # Get the effective config file
     /usr/bin/rpminspect -c ${config} \
             ${profile_name:+--profile=$profile_name} \
             -D > effective_rpminspect.yaml || :
 fi
-
-rpminspect_get_local_config.sh "${after_build}"
 
 update_clamav_database
 

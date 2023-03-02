@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-# ./rpminspect_runner.sh $TASK_ID $PREVIOUS_TAG $TEST_NAME
+# ./rpminspect_runner.sh $TASK_ID $PREVIOUS_TAG
 #
 # The script recognizes following environment variables:
 # RPMINSPECT_CONFIG - path to the rpminspect config file
@@ -41,11 +41,6 @@ koji_bin=${KOJI_BIN:-/usr/bin/koji}
 task_id=${1}
 previous_tag=${2}
 
-# This used to be called with a test name; avoid calling with old fmf from rpminspect-pipeline's
-if [ -n "${3:-}" ]; then
-    echo "calling with test name is obsolete" >&2
-    exit 3
-fi
 
 # In case there is no dist tag (like ".fc34") in the package name,
 # rpminspect doesn't know which test configuration to use
@@ -189,21 +184,11 @@ else
     fi
 fi
 
-echo -n "${after_build}" > "${results_cache_dir}/after_build"
-echo -n "${before_build}" > "${results_cache_dir}/before_build"
-
 repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
 repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }')
 commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }')
 
 fetch-my-yaml.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
-
-if [ ! -f "effective_rpminspect.yaml" ]; then
-    # Get the effective config file
-    /usr/bin/rpminspect -c ${config} \
-            ${profile_name:+--profile=$profile_name} \
-            -D > effective_rpminspect.yaml || :
-fi
 
 update_clamav_database
 
@@ -251,14 +236,6 @@ rc=0
 rm -Rf "${workdir}"
 rm -Rf "${tmpdir}"
 
-if [ $rc -gt 1 ]; then
-    # rpminspect probably crashed... let's show the verbose.log
-    cat $verbose_log
-fi
-
-after_build=$(cat "${results_cache_dir}/after_build")
-before_build=$(cat "${results_cache_dir}/before_build")
-
 case $rc in
     0) tmtresult="pass" ;;
     1) tmtresult="fail" ;;
@@ -289,20 +266,3 @@ EOF
     fi
     echo "running in TMT, wrote $TMT_TEST_DATA/results.yaml"
 fi
-
-rpminspect_version=`rpm -q --qf "%{VERSION}-%{RELEASE}" ${RPMINSPECT_PACKAGE_NAME}`
-data_version=`rpm -q --qf "%{VERSION}-%{RELEASE}" ${RPMINSPECT_DATA_PACKAGE_NAME}`
-
-echo "rpminspect version: ${rpminspect_version} (with data package: ${data_version})"
-echo "rpminspect profile: ${profile_name:-none}"
-echo "new build: ${after_build}"
-if [ -z "${before_build}" ]; then
-    if [ -n "${previous_tag}" ]; then
-        echo "old build: not found (in ${previous_tag} $(basename ${koji_bin}) tag)"
-    fi
-else
-    echo "old build: ${before_build} (found in ${previous_tag} $(basename ${koji_bin}) tag)"
-fi
-echo
-echo "rpminspect exited with status code $rc ($tmtresult)"
-exit $rc

@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:37
+FROM registry.fedoraproject.org/fedora:38
 LABEL maintainer "Fedora-CI"
 LABEL description="rpminspect for fedora-ci"
 
@@ -16,6 +16,9 @@ RUN dnf install -y --enablerepo=updates-testing \
     libabigail \
     clamav-update \
     python3-pyyaml \
+    python3-click \
+    python3-retry \
+    python3-GitPython \
     koji \
     git \
     jq \
@@ -24,4 +27,4 @@ RUN dnf install -y --enablerepo=updates-testing \
 # Update the virus database (we also update it when running the inspection)
 RUN freshclam
 
-COPY *.sh /usr/local/bin/
+COPY *.sh *.py /usr/local/bin/

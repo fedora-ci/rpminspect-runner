@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Clone given git repository and copy rpminspect.yaml to the current working directory."""
+"""Clone given git repository and copy local rpminspect configuration file to the current working directory."""
 
 import shutil
 import tempfile
@@ -14,7 +14,7 @@ from retry import retry
 
 @retry((git.exc.GitCommandError), delay=60, tries=10, log_traceback=True)
 def clone_and_copy(repo_url: str, branches: List[str], commit: str) -> None:
-    """Clone given git repository and copy rpminspect.yaml to the current working directory."""
+    """Clone given git repository and copy local rpminspect configuration file to the current working directory."""
     git_cmd = git.cmd.Git()
 
     for branch in branches:
@@ -34,12 +34,15 @@ def clone_and_copy(repo_url: str, branches: List[str], commit: str) -> None:
             git_repo = git.Repo.clone_from(url=repo_url, to_path=tmp_dir)
             git_repo.git.checkout(commit)
 
-        rpminspect_yaml_path = Path(tmp_dir, "rpminspect.yaml")
-        if rpminspect_yaml_path.is_file():
-            print("rpminspect.yaml file found!")
-            shutil.copy(rpminspect_yaml_path, Path(Path.cwd(), "rpminspect.yaml"))
-        else:
-            print("No rpminspect.yaml in the repository...")
+        for t in ["yaml", "json", "dson"]:
+            cfgfile = "rpminspect.%s" % t
+            rpminspect_cfg_path = Path(tmp_dir, cfgfile)
+
+            if rpminspect_cfg_path.is_file():
+                print("%s file found!" % cfgfile)
+                shutil.copy(rpminspect_cfg_path, Path(Path.cwd(), cfgfile))
+            else:
+                print("No %s in the repository..." % cfgfile)
 
 
 @click.command()

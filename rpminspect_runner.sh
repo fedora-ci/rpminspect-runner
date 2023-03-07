@@ -188,7 +188,7 @@ repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ 
 repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }')
 commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }')
 
-fetch-my-yaml.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
+fetch-my-conf.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
 
 update_clamav_database
 

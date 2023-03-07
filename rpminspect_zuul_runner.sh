@@ -80,8 +80,8 @@ if [ "${cached}" == "false" ]; then
     mkdir -p "${logs_dir}"
     # Prepare cache
     "${scripts_dir}/prepare_cache.sh" "${repo_url}" > "${logs_dir}/1_prepare_cache.log" 2>&1
-    # Obtain component-specific rpminspect.yaml
-    "${scripts_dir}/fetch_rpminspect_yaml.sh" "${repo_url}" > "${logs_dir}/2_fetch_rpminspect_yaml.log" 2>&1
+    # Obtain component-specific rpminspect config file
+    "${scripts_dir}/fetch_rpminspect_conf.sh" "${repo_url}" > "${logs_dir}/2_fetch_rpminspect_conf.log" 2>&1
     # Update environment
     "${scripts_dir}/update_env.sh" > "${logs_dir}/3_update_env.log" 2>&1
     # Run rpminspect

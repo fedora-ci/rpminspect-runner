@@ -6,6 +6,7 @@ script_dir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 workdir=${RPMINSPECT_WORKDIR:-${PWD}}
 cache_dir="${workdir}/cache"
 results_cache_dir="${workdir}/results_cache"
+exts="yaml json dson"
 
 mkdir -p "${results_cache_dir}"
 
@@ -17,7 +18,12 @@ after_build_dir="${cache_dir}/${after_build}"
 
 set -x
 
-cat rpminspect.yaml || :
+for ext in ${exts} ; do
+    if [ -f "rpminspect.${ext}" ]; then
+        echo "=> rpminspect.${ext} contents:"
+        cat "rpminspect.${ext}"
+    fi
+done
 
 "${RPMINSPECT_BIN}" \
     --format=json \

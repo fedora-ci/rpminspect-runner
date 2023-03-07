@@ -37,6 +37,7 @@ fix_rc() {
 
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
 koji_bin=${KOJI_BIN:-/usr/bin/koji}
+exts="yaml json dson"
 
 task_id=${1}
 previous_tag=${2}
@@ -216,9 +217,14 @@ export TMPDIR="${tmpdir}"
 rc=0
 
 (
-    echo "Checking the component-specific rpminspect.yaml..."
+    echo "Checking the component-specific rpminspect config file..."
     set -x
-    cat rpminspect.yaml || :
+    for ext in ${exts} ; do
+        if [ -f "rpminspect.${ext}" ]; then
+            echo "=> rpminspect.${ext} contents:"
+            cat "rpminspect.${ext}"
+        fi
+    done
     rpm -qa | grep rpminspect
     /usr/bin/rpminspect -c ${config} \
         --workdir "${workdir}" \
@@ -260,9 +266,12 @@ if [ -n "$TMT_TEST_DATA" ]; then
     - data/rpminspect/data/result.json
 EOF
     # if dist-git uses a custom rpminspect config, add that as an artifact as well
-    if [ -e rpminspect.yaml ]; then
-        cp rpminspect.yaml "$TMT_TEST_DATA"
-        echo "    - data/rpminspect/data/rpminspect.yaml" >> "$TMT_TEST_DATA/results.yaml"
-    fi
+    for ext in ${exts} ; do
+        cfgfile="rpminspect.${ext}"
+        if [ -e "${cfgfile}" ]; then
+            cp "${cfgfile}" "$TMT_TEST_DATA"
+            echo "    - data/rpminspect/data/${cfgfile}" >> "$TMT_TEST_DATA/results.yaml"
+        fi
+    done
     echo "running in TMT, wrote $TMT_TEST_DATA/results.yaml"
 fi

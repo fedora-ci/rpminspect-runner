@@ -28,3 +28,4 @@ RUN dnf install -y --enablerepo=updates-testing \
 RUN freshclam
 
 COPY *.sh *.py /usr/local/bin/
+

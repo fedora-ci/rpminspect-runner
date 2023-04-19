@@ -186,8 +186,8 @@ else
 fi
 
 repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
-repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }')
-commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }')
+repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }' | awk -F'?' '{ print $1 }'))
+commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print $1 }')
 
 fetch-my-conf.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
 

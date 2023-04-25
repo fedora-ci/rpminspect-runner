@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:38
+FROM registry.fedoraproject.org/fedora:39
 LABEL maintainer "Fedora-CI"
 LABEL description="rpminspect for fedora-ci"
 

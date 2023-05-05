@@ -260,10 +260,10 @@ if [ -n "$TMT_TEST_DATA" ]; then
 - name: /rpminspect
   result: $tmtresult
   log:
-    - data/rpminspect/output.txt
-    - data/rpminspect/data/viewer.html
-    - data/rpminspect/data/verbose.log
-    - data/rpminspect/data/result.json
+    - ../output.txt
+    - viewer.html
+    - verbose.log
+    - result.json
 EOF
     # if dist-git uses a custom rpminspect config, add that as an artifact as well
     for ext in ${exts} ; do

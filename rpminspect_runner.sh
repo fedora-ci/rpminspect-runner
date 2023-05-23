@@ -130,15 +130,14 @@ get_before_module_build() {
     local previous_tag=$2
     local name=$(get_name_from_nvr $after_build)
     local name_stream=$(get_ns_from_module_nvr $after_build)
-    # TODO: it would be better to actually compare NVRs instead of assuming that the last NVR in the list is the latest...
-    before_build=$(${koji_bin} list-tagged --inherit --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -1)
+    before_build=$(${koji_bin} list-tagged --inherit --latest-n=2 --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -1)
 
     if [ "${before_build}" == "${after_build}" ]; then
         # Reset $before_build so we can return an empty string if no previous builds are found
         before_build=''
 
         # Get the latest-1 NVR
-        before_build_candidate=$(${koji_bin} list-tagged --inherit --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -2 | head -1)
+        before_build_candidate=$(${koji_bin} list-tagged --inherit --latest-n=2 --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }'  | head -1)
         if [ "${before_build_candidate}" != "${after_build}" ]; then
                 before_build=${before_build_candidate}
         fi

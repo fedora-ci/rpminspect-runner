@@ -245,7 +245,7 @@ rc=0
         ${default_release_string:+--release=$default_release_string} \
         ${profile_name:+--profile=$profile_name} \
         ${tests:+--tests=$tests} \
-        "${before_build}" \
+        ${before_build} \
         "${after_build_param}"
 ) > "$verbose_log" 2>&1 || rc=$?
 

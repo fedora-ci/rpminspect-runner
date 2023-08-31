@@ -78,13 +78,19 @@ get_ns_from_module_nvr() {
     echo -n ${name}
 }
 
-get_after_build() {
-    # Convert task id to NVR.
+get_task_info() {
+    # Get information about given task id. Specifically NVR and whether it is a scratch build or not.
     # Params:
     # $1: task id
     local task_id=$1
-    after_build=$(basename $("$koji_bin" taskinfo -v -r "$task_id" | grep "SRPM: " | head -1 | awk '{ print $2 }' | sed 's|\.src.rpm$||g'))
-    echo -n ${after_build}
+    task_info=$("$koji_bin" taskinfo -v -r "$task_id")
+    build_nvr=$(basename "$(echo "$task_info" | grep "SRPM: " | head -1 | awk '{ print $2 }' | sed 's|\.src.rpm$||g')")
+    is_scratch="no"
+    is_scratch_output=$(echo "$task_info" | grep "scratch: True")
+    if [ -n "$is_scratch_output" ]; then
+        is_scratch="yes"
+    fi
+    echo -n "${build_nvr} ${is_scratch}"
 }
 
 get_before_build() {
@@ -178,9 +184,14 @@ if [ "${is_module}" == "yes" ]; then
     fi
     after_build_param="${after_build}"
 else
-    after_build=$(get_after_build "${task_id}")
+    task_info=$(get_task_info "${task_id}")
+    after_build=$(echo "$task_info" | awk '{ print $1 }')
+    is_scratch=$(echo "$task_info" | awk '{ print $2 }')
     if [ -n "$previous_tag" ]; then
         before_build=$(get_before_build "${after_build}" "${previous_tag}")
+    fi
+    if [ "$is_scratch" == "no" ]; then
+        after_build_param="$after_build"
     fi
 fi
 
@@ -234,8 +245,8 @@ rc=0
         ${default_release_string:+--release=$default_release_string} \
         ${profile_name:+--profile=$profile_name} \
         ${tests:+--tests=$tests} \
-        ${before_build} \
-        ${after_build_param}
+        "${before_build}" \
+        "${after_build_param}"
 ) > "$verbose_log" 2>&1 || rc=$?
 
 rm -Rf "${workdir}"

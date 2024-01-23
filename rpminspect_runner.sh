@@ -10,6 +10,7 @@
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # KOJI_BIN - path where to find "koji" binary
+# KOJI_NVR - run rpminspect on this NVR instead of the TASK_ID
 # ARCHES - a comma-separated list of architectures to test (e.g.: x86_64,noarch,src)
 # IS_MODULE - "yes" if the given TASK_ID is a module task ID from MBS
 # MBS_API_URL - Module Build System (MBS) API URL
@@ -172,26 +173,35 @@ before_build=''
 
 if [ "${is_module}" == "yes" ]; then
 
-    module_info=$(curl "${MBS_API_URL}/module-build-service/1/module-builds/${task_id}")
-    name=$(echo "${module_info}" | jq -r .name)
-    stream=$(echo "${module_info}" | jq -r .stream)
-    version=$(echo "${module_info}" | jq -r .version)
-    context=$(echo "${module_info}" | jq -r .context)
-    after_build="${name}-${stream}-${version}.${context}"
+    if [ -n "${KOJI_NVR}" ]; then
+        after_build="${KOJI_NVR}"
+    else
+        module_info=$(curl "${MBS_API_URL}/module-build-service/1/module-builds/${task_id}")
+        name=$(echo "${module_info}" | jq -r .name)
+        stream=$(echo "${module_info}" | jq -r .stream)
+        version=$(echo "${module_info}" | jq -r .version)
+        context=$(echo "${module_info}" | jq -r .context)
+        after_build="${name}-${stream}-${version}.${context}"
+    fi
 
     if [ -n "$previous_tag" ]; then
         before_build=$(get_before_module_build "${after_build}" "${previous_tag}")
     fi
     after_build_param="${after_build}"
 else
-    task_info=$(get_task_info "${task_id}")
-    after_build=$(echo "$task_info" | awk '{ print $1 }')
-    is_scratch=$(echo "$task_info" | awk '{ print $2 }')
-    if [ -n "$previous_tag" ]; then
-        before_build=$(get_before_build "${after_build}" "${previous_tag}")
-    fi
-    if [ "$is_scratch" == "no" ]; then
-        after_build_param="$after_build"
+    if [ -n "${KOJI_NVR}" ]; then
+        after_build="${KOJI_NVR}"
+        after_build_param="${after_build}"
+    else
+        task_info=$(get_task_info "${task_id}")
+        after_build=$(echo "$task_info" | awk '{ print $1 }')
+        is_scratch=$(echo "$task_info" | awk '{ print $2 }')
+        if [ -n "$previous_tag" ]; then
+            before_build=$(get_before_build "${after_build}" "${previous_tag}")
+        fi
+        if [ "$is_scratch" == "no" ]; then
+            after_build_param="$after_build"
+        fi
     fi
 fi
 

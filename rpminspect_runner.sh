@@ -155,6 +155,8 @@ get_before_module_build() {
 }
 
 
+freshclam_log=${TMT_TEST_DATA:-.}/freshclam.log
+
 update_clamav_database() {
     # Update the virus dababase
     config_file="freshclam.conf"
@@ -163,12 +165,12 @@ update_clamav_database() {
         sed -i "s|^DatabaseMirror .*|DatabaseMirror $CLAMAV_DATABASE_MIRROR_URL|" "$config_file"
     fi
 
-    freshclam --config-file="$config_file" > freshclam.log 2>&1 || :
+    freshclam --config-file="$config_file" > "$freshclam_log" 2>&1 || :
     # freshclam returns 0 even if the update download fails
     # https://github.com/Cisco-Talos/clamav/issues/965
     # Let's check the log for the complaint about the outdated database
     # and return non-zero if we find it there
-    ! grep -q 'virus database is older' freshclam.log
+    ! grep -q 'virus database is older' "$freshclam_log"
 }
 
 

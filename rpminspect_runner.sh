@@ -164,6 +164,11 @@ update_clamav_database() {
     fi
 
     freshclam --config-file="$config_file" > freshclam.log 2>&1 || :
+    # freshclam returns 0 even if the update download fails
+    # https://github.com/Cisco-Talos/clamav/issues/965
+    # Let's check the log for the complaint about the outdated database
+    # and return non-zero if we find it there
+    ! grep -q 'virus database is older' freshclam.log
 }
 
 
@@ -211,7 +216,12 @@ commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print 
 
 fetch-my-conf.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
 
-update_clamav_database
+if ! update_clamav_database; then
+    # Oops, incremental update of the ClamAV virus database has failed.
+    # Let's try again. freshclam should attempt to download the whole
+    # daily.cvd this time, instead of just incremental patches.
+    update_clamav_database || :
+fi
 
 # Update annobin
 # FIXME: we don't want to touch packages when the base image is Rawhide...
@@ -284,6 +294,7 @@ if [ -n "$TMT_TEST_DATA" ]; then
     - viewer.html
     - verbose.log
     - result.json
+    - freshclam.log
 EOF
     # if dist-git uses a custom rpminspect config, add that as an artifact as well
     for ext in ${exts} ; do

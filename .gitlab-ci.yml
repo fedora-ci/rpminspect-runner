@@ -22,7 +22,7 @@ image build:
       /kaniko/executor
       --skip-tls-verify
       --context $CI_PROJECT_DIR
-      --dockerfile $CI_PROJECT_DIR/Dockerfile
+      --dockerfile $CI_PROJECT_DIR/Dockerfile.rhel
       --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:${CI_COMMIT_SHORT_SHA}
       --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:latest
 
@@ -43,6 +43,6 @@ merge request image build:
       /kaniko/executor
       --skip-tls-verify
       --context $CI_PROJECT_DIR
-      --dockerfile $CI_PROJECT_DIR/Dockerfile
+      --dockerfile $CI_PROJECT_DIR/Dockerfile.rhel
       --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:mr-${CI_MERGE_REQUEST_IID}
       --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:mr-${CI_MERGE_REQUEST_IID}-${CI_COMMIT_SHORT_SHA}

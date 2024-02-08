@@ -1,0 +1,47 @@
+FROM images.paas.redhat.com/osci/base-minimal
+LABEL maintainer "OSCI"
+LABEL description="rpminspect for RHEL"
+
+# https://copr.fedorainfracloud.org/coprs/dcantrell/rpminspect/
+ENV RPMINSPECT_PACKAGE_NAME=rpminspect
+# https://copr.devel.redhat.com/coprs/dcantrell/rpminspect-data-redhat/
+ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-redhat
+
+ENV KOJI_BIN=/usr/bin/brew
+ENV RPMINSPECT_CONFIG=/usr/share/rpminspect/redhat.yaml
+
+# Add repository for "brew" command
+RUN cd /etc/yum.repos.d/ && \
+    curl -L -O https://download.devel.redhat.com/rel-eng/RCMTOOLS/rcm-tools-rhel-9-baseos.repo
+
+# Add COPR reposiroty with rpminspect
+RUN cd /etc/yum.repos.d/ && \
+    curl -L -O https://copr.fedorainfracloud.org/coprs/g/osci/rpminspect/repo/epel-9/group_osci-rpminspect-epel-9.repo
+
+# Add COPR reposiroty with rpminspect data package
+RUN cd /etc/yum.repos.d/ && \
+    curl -L -O https://copr.devel.redhat.com/coprs/dcantrell/rpminspect-data-redhat/repo/epel-9/dcantrell-rpminspect-data-redhat-epel-9.repo
+
+# Add COPR reposiroty with rpminspect data package dependencies
+RUN cd /etc/yum.repos.d/ && \
+    curl -L -O https://copr.fedorainfracloud.org/coprs/g/osci/rpminspect-data-deps/repo/epel-9/group_osci-rpminspect-data-deps-epel-9.repo
+
+# Update and install dependencies
+RUN dnf -y update &&\
+    dnf -y install --enablerepo=rhel-9-buildroot \
+    ${RPMINSPECT_PACKAGE_NAME} \
+    ${RPMINSPECT_DATA_PACKAGE_NAME} \
+    clamav-update \
+    python3-pyyaml \
+    python3-click \
+    python3-retry \
+    python3-GitPython \
+    koji \
+    git \
+    jq \
+    brewkoji \
+    && dnf clean all
+
+RUN freshclam
+
+COPY *.sh *.py /usr/local/bin/

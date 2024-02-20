@@ -230,8 +230,8 @@ fi
 #     We can uncomment this once the latest annocheck can be installed from a stable repo.
 #dnf update -y annobin* > update_annobin.log 2>&1 || :
 
-# Update the data package, but from COPR, not from the official Fedora repositories
-dnf update --disablerepo="fedora*" -y ${RPMINSPECT_PACKAGE_NAME} ${RPMINSPECT_DATA_PACKAGE_NAME} > update_rpminspect.log 2>&1 || :
+# Update the data packages, but from COPR, not from the official Fedora repositories
+dnf -y update --disablerepo="fedora*" "${RPMINSPECT_PACKAGE_NAME}" "${RPMINSPECT_DATA_PACKAGE_NAME}" fedora-license-data > update_rpminspect.log 2>&1 || :
 
 output_filename=${TMT_TEST_DATA:-.}/result.json
 verbose_log=${TMT_TEST_DATA:-.}/verbose.log

@@ -4,21 +4,22 @@
 
 The runner script tries to update rpminspect (and data package) to the latest version every time it runs.
 
-
 ## How to build and run the container image locally
 
-
 Build the image using podman:
+
 ```shell
 $ podman build -t quay.io/fedoraci/rpminspect:devel .
 ```
 
 You can also force-update base image and dependencies with `--pull` and `--no-cache` options:
+
 ```shell
 $ podman build --pull --no-cache -t quay.io/fedoraci/rpminspect:devel .
 ```
 
 Run the image:
+
 ```shell
 $ podman run -ti --rm quay.io/fedoraci/rpminspect:devel /bin/bash
 
@@ -30,7 +31,6 @@ $ rpminspect-fedora -T license gnome-chess-42.0-1.fc37
 $ rpminspect_runner.sh 84688996 f37-updates license
 ...
 ```
-
 
 ## rpminspect-image CI/CD
 
@@ -49,6 +49,7 @@ If Quay.io fails to build the image (infra/network errors...), it is possible to
 Only owners of the [`fedoraci` namespace](https://quay.io/organization/fedoraci/teams/owners) can push images manually.
 
 Build the image using podman:
+
 ```shell
 $ podman build --pull --no-cache -t quay.io/fedoraci/rpminspect:$(git rev-parse --short HEAD) .
 ```
@@ -56,15 +57,14 @@ $ podman build --pull --no-cache -t quay.io/fedoraci/rpminspect:$(git rev-parse 
 Create a new [robot account](https://quay.io/repository/fedoraci/rpminspect?tab=settings), then click on the account name and select the "Docker Login" tab. Copy the login command and replace "docker" with "podman".
 
 Push the image:
+
 ```shell
 podman push quay.io/fedoraci/rpminspect:$(git rev-parse --short HEAD)
 ```
 
-
 ## Promote new image to production
 
 Update image tag in [rpminspect.fmf](https://github.com/fedora-ci/rpminspect-pipeline/blob/master/rpminspect.fmf).
-
 
 ### Test the image end-to-end in CI
 

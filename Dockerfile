@@ -1,6 +1,6 @@
 FROM registry.fedoraproject.org/fedora:41
-LABEL maintainer "Fedora-CI"
-LABEL description="rpminspect for fedora-ci"
+LABEL maintainer "Fedora CI"
+LABEL description="rpminspect for Fedora CI"
 
 # https://copr.fedorainfracloud.org/coprs/dcantrell/rpminspect/
 ENV RPMINSPECT_PACKAGE_NAME=rpminspect

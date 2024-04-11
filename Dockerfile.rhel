@@ -2,7 +2,7 @@ FROM images.paas.redhat.com/osci/base-minimal
 LABEL maintainer "OSCI"
 LABEL description="rpminspect for RHEL"
 
-# https://copr.fedorainfracloud.org/coprs/dcantrell/rpminspect/
+# https://copr.fedorainfracloud.org/coprs/g/osci/rpminspect/
 ENV RPMINSPECT_PACKAGE_NAME=rpminspect
 # https://copr.devel.redhat.com/coprs/dcantrell/rpminspect-data-redhat/
 ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-redhat

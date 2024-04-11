@@ -20,7 +20,7 @@ RUN cd /etc/yum.repos.d/ && \
 
 # Add COPR repository with rpminspect data package
 RUN cd /etc/yum.repos.d/ && \
-    curl -L -O https://copr.fedorainfracloud.org/coprs/g/osci/rpminspect-annobin-12.48/repo/epel-9/group_osci-rpminspect-annobin-12.48-epel-9.repo
+    curl -L -O https://copr.devel.redhat.com/coprs/dcantrell/rpminspect-data-redhat/repo/epel-9/dcantrell-rpminspect-data-redhat-epel-9.repo
 
 # Add COPR repository with rpminspect data package dependencies
 RUN cd /etc/yum.repos.d/ && \

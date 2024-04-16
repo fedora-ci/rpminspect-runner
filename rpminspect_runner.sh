@@ -16,6 +16,7 @@
 # MBS_API_URL - Module Build System (MBS) API URL
 # TESTS - a comma-separated list of inspections to run
 # CLAMAV_DATABASE_MIRROR_URL - if set, use this mirror to update the clamav database
+# IGNORE_LOCAL_RPMINSPECT_YAML - "yes" if the local rpminspect.yaml file should be ignored
 
 set -e
 
@@ -216,7 +217,11 @@ repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ 
 repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }' | awk -F'?' '{ print $1 }')
 commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print $1 }')
 
-fetch-my-conf.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
+if [ "${IGNORE_LOCAL_RPMINSPECT_YAML}" == "yes" ]; then
+    echo "IGNORE_LOCAL_RPMINSPECT_YAML is set to "yes" -> skipping fetching the local rpminspect.yaml file"
+else
+    fetch-my-conf.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
+fi
 
 if ! update_clamav_database; then
     # Oops, incremental update of the ClamAV virus database has failed.

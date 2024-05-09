@@ -230,11 +230,6 @@ if ! update_clamav_database; then
     update_clamav_database || :
 fi
 
-# Update annobin
-# FIXME: we don't want to touch packages when the base image is Rawhide...
-#     We can uncomment this once the latest annocheck can be installed from a stable repo.
-#dnf update -y annobin* > update_annobin.log 2>&1 || :
-
 # Update the data packages, but from COPR, not from the official Fedora repositories
 dnf -y update --disablerepo="fedora*" "${RPMINSPECT_PACKAGE_NAME}" "${RPMINSPECT_DATA_PACKAGE_NAME}" fedora-license-data > update_rpminspect.log 2>&1 || :
 

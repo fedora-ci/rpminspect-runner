@@ -6,7 +6,7 @@ LABEL description="rpminspect for Fedora CI"
 ENV RPMINSPECT_PACKAGE_NAME=rpminspect
 ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-fedora
 
-RUN dnf -y install 'dnf-command(copr)' && \
+RUN dnf -y install 'dnf5-command(copr)' && \
     dnf -y copr enable dcantrell/rpminspect && \
     dnf -y copr enable @osci/fedora-license-data
 

@@ -213,7 +213,7 @@ else
     fi
 fi
 
-repo_ref=$("${koji_bin}" buildinfo "${after_build}" | grep "^Source: " | awk '{ print $2 }' | sed 's|^git+||')
+repo_ref=$("${koji_bin}" taskinfo -v "${after_build_param}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }' | awk -F'?' '{ print $1 }')
 commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print $1 }')
 

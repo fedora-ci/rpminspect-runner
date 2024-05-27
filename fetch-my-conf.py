@@ -6,6 +6,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import List
+import sys
 
 import click
 import git
@@ -13,7 +14,7 @@ from retry import retry
 
 
 @retry((git.exc.GitCommandError), delay=60, tries=10, log_traceback=True)
-def clone_and_copy(repo_url: str, branches: List[str], commit: str) -> None:
+def clone_and_copy(repo_url: str, branches: List[str], commit: str, strategy: str) -> None:
     """Clone given git repository and copy local rpminspect configuration file to the current working directory."""
     git_cmd = git.cmd.Git()
 
@@ -22,11 +23,14 @@ def clone_and_copy(repo_url: str, branches: List[str], commit: str) -> None:
         if [x for x in git_cmd.ls_remote("--heads", repo_url, f"refs/heads/{branch}").split("\n") if x]:
             break
     else:
+        if strategy == 'branch':
+            print(f"Given branches ({branches}) don't exist...")
+            sys.exit(1)
         # None of the branches exist -- we will need to use the commit hash
         branch = None
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        if branch:
+        if branch and strategy in ('branch', 'fallback'):
             print(f"Cloning {repo_url} (branch: {branch})...")
             git.Repo.clone_from(url=repo_url, to_path=tmp_dir, single_branch=True, branch=branch)
         else:
@@ -46,12 +50,19 @@ def clone_and_copy(repo_url: str, branches: List[str], commit: str) -> None:
 
 
 @click.command()
+@click.option(
+    '--strategy',
+    type=click.Choice(['branch', 'commit', 'fallback'], case_sensitive=False),
+    default='branch',
+    required=False,
+    help='Where to look for the rpminspect.yaml (default: "fallback")'
+)
 @click.argument("repo-url")
 @click.argument("branches")
 @click.argument("commit")
-def main(repo_url: str, branches: str, commit: str) -> None:
+def main(repo_url: str, branches: str, commit: str, strategy: str) -> None:
     branches = branches.split(",")
-    clone_and_copy(repo_url, branches, commit)
+    clone_and_copy(repo_url, branches, commit, strategy)
 
 
 if __name__ == "__main__":

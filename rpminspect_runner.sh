@@ -17,6 +17,7 @@
 # TESTS - a comma-separated list of inspections to run
 # CLAMAV_DATABASE_MIRROR_URL - if set, use this mirror to update the clamav database
 # IGNORE_LOCAL_RPMINSPECT_YAML - "yes" if the local rpminspect.yaml file should be ignored
+# RPMINSPECT_YAML_LOOKUP_STRATEGY - one of: "branch", "commit", "fallback". Where to look for the local rpminspect.yaml file
 
 set -e
 
@@ -220,7 +221,7 @@ commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print 
 if [ "${IGNORE_LOCAL_RPMINSPECT_YAML}" == "yes" ]; then
     echo "IGNORE_LOCAL_RPMINSPECT_YAML is set to "yes" -> skipping fetching the local rpminspect.yaml file"
 else
-    fetch-my-conf.py "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
+    fetch-my-conf.py ${RPMINSPECT_YAML_LOOKUP_STRATEGY:+--strategy "$RPMINSPECT_YAML_LOOKUP_STRATEGY"} "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
 fi
 
 if ! update_clamav_database; then

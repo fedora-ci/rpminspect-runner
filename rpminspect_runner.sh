@@ -178,6 +178,7 @@ update_clamav_database() {
 
 after_build_param="${task_id}"
 
+repo_ref=''
 before_build=''
 
 if [ "${is_module}" == "yes" ]; then
@@ -197,6 +198,7 @@ if [ "${is_module}" == "yes" ]; then
         before_build=$(get_before_module_build "${after_build}" "${previous_tag}")
     fi
     after_build_param="${after_build}"
+    repo_ref=$("${koji_bin}" buildinfo "${after_build_param}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 else
     if [ -n "${KOJI_NVR}" ]; then
         after_build="${KOJI_NVR}"
@@ -212,9 +214,9 @@ else
             after_build_param="$after_build"
         fi
     fi
+    repo_ref=$("${koji_bin}" taskinfo -v "${task_id}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 fi
 
-repo_ref=$("${koji_bin}" taskinfo -v "${task_id}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }' | awk -F'?' '{ print $1 }')
 commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print $1 }')
 

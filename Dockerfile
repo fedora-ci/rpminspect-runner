@@ -14,7 +14,7 @@ RUN dnf -y install 'dnf5-command(copr)' && \
 RUN dnf install -y --enablerepo=updates-testing \
     ${RPMINSPECT_PACKAGE_NAME} \
     ${RPMINSPECT_DATA_PACKAGE_NAME} \
-    libabigail \
+    "libabigail >= 2.5" \
     clamav-update \
     python3-pyyaml \
     python3-click \

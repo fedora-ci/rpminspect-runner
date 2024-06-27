@@ -40,7 +40,8 @@ RUN dnf -y update &&\
     git \
     jq \
     brewkoji \
-    "libabigail >= 2.4" \
+    "libabigail >= 2.5" \
+    "annobin-annocheck >= 12.59" \
     && dnf clean all
 
 RUN freshclam

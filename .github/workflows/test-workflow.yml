@@ -1,5 +1,10 @@
 name: Image build and push
 on: [push, pull_request]
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
@@ -22,9 +27,19 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
       - name: Build Image
         uses: redhat-actions/buildah-build@v2
+        id: build
         with:
           image: quay.io/fedoraci/rpminspect
           tags: ${{ steps.meta.outputs.tags }}
           containerfiles: |
             ./Dockerfile
+      - name: Push to GitHub Image registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ github.event_name == 'pull_request' }}
       - run: echo "🍏 This job's status is ${{ job.status }}."

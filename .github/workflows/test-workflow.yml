@@ -9,11 +9,22 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v4
+      - name: Gather metadata
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: quay.io/fedoraci/rpminspect
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            # set latest tag for default branch
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Build Image
         uses: redhat-actions/buildah-build@v2
         with:
           image: quay.io/fedoraci/rpminspect
-          tags: latest ${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
           containerfiles: |
             ./Dockerfile
       - run: echo "🍏 This job's status is ${{ job.status }}."

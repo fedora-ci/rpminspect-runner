@@ -44,6 +44,11 @@ RUN dnf -y update &&\
     "annobin-annocheck >= 12.59" \
     && dnf clean all
 
+# Prepare the configuration file to run rpminspect against Brew stage.
+RUN cp /usr/share/rpminspect/redhat.yaml /usr/share/rpminspect/redhat-stage.yaml && \
+    sed -i 's,brewhub.engineering,brewhub.stage.engineering,g' /usr/share/rpminspect/redhat-stage.yaml && \
+    sed -i 's,download.devel.redhat.com,brewweb.stage.engineering.redhat.com,g' /usr/share/rpminspect/redhat-stage.yaml
+
 RUN freshclam
 
 COPY *.sh *.py /usr/local/bin/

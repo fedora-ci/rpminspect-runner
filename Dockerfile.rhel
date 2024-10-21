@@ -41,7 +41,7 @@ RUN dnf -y update &&\
     jq \
     brewkoji \
     "libabigail >= 2.5" \
-    "annobin-annocheck >= 12.59" \
+    "annobin-annocheck >= 12.71" \
     && dnf clean all
 
 # Prepare the configuration file to run rpminspect against Brew stage.

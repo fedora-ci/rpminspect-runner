@@ -15,6 +15,7 @@
 # IS_MODULE - "yes" if the given TASK_ID is a module task ID from MBS
 # MBS_API_URL - Module Build System (MBS) API URL
 # TESTS - a comma-separated list of inspections to run
+# SKIP_TESTS - a comma-separated list of inspections to skip
 # CLAMAV_DATABASE_MIRROR_URL - if set, use this mirror to update the clamav database
 # IGNORE_LOCAL_RPMINSPECT_YAML - "yes" if the local rpminspect.yaml file should be ignored
 # RPMINSPECT_YAML_LOOKUP_STRATEGY - one of: "branch", "commit", "fallback". Where to look for the local rpminspect.yaml file
@@ -57,6 +58,8 @@ arches=${ARCHES}
 is_module="${IS_MODULE}"
 
 tests="${TESTS}"
+
+skip_tests="${SKIP_TESTS}"
 
 # support running out of git tree
 MYDIR="$(dirname $(realpath "$0"))"
@@ -270,6 +273,7 @@ rc=0
         ${default_release_string:+--release=$default_release_string} \
         ${profile_name:+--profile=$profile_name} \
         ${tests:+--tests=$tests} \
+        ${skip_tests:+--exclude=$skip_tests} \
         ${before_build} \
         "${after_build_param}"
 ) > "$verbose_log" 2>&1 || rc=$?

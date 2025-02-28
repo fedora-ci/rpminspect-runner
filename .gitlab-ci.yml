@@ -13,7 +13,7 @@ image build:
     entrypoint: [""]
   stage: buildimage
   tags:
-    - docker
+    - shared-podman
   before_script:
     - mkdir -p /kaniko/.docker
     - cat "$DOCKER_AUTH_CONFIG" > /kaniko/.docker/config.json
@@ -34,7 +34,7 @@ merge request image build:
     entrypoint: [""]
   stage: buildimage
   tags:
-    - docker
+    - shared-podman
   before_script:
     - mkdir -p /kaniko/.docker
     - cat "$DOCKER_AUTH_CONFIG" >  /kaniko/.docker/config.json

@@ -22,6 +22,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     python3-retry \
     python3-GitPython \
     koji \
+    gawk \
     git \
     jq \
     && dnf clean all

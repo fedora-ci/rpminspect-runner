@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:42
+FROM registry.fedoraproject.org/fedora:43
 LABEL maintainer "Fedora CI"
 LABEL description="rpminspect for Fedora CI"
 
@@ -15,7 +15,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     ${RPMINSPECT_PACKAGE_NAME} \
     ${RPMINSPECT_DATA_PACKAGE_NAME} \
     "libabigail >= 2.6" \
-    "annobin-annocheck >= 12.84" \
+    "annobin-annocheck >= 12.93" \
     clamav-update \
     python3-pyyaml \
     python3-click \

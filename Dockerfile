@@ -8,13 +8,14 @@ ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-fedora
 
 RUN dnf -y install 'dnf5-command(copr)' && \
     dnf -y copr enable dcantrell/rpminspect && \
-    dnf -y copr enable @osci/fedora-license-data
+    dnf -y copr enable @osci/fedora-license-data && \
+    dnf copr enable @osci/libabigail
 
 # We enable updates-testing to pull in the latest annobin
 RUN dnf install -y --enablerepo=updates-testing \
     ${RPMINSPECT_PACKAGE_NAME} \
     ${RPMINSPECT_DATA_PACKAGE_NAME} \
-    "libabigail >= 2.6" \
+    "libabigail >= 2.7" \
     "annobin-annocheck >= 12.93" \
     clamav-update \
     python3-pyyaml \

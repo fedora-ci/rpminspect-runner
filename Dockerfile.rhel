@@ -26,6 +26,10 @@ RUN cd /etc/yum.repos.d/ && \
 RUN cd /etc/yum.repos.d/ && \
     curl -L -O  https://copr.fedorainfracloud.org/coprs/g/osci/fedora-license-data/repo/epel-9/group_osci-fedora-license-data-epel-9.repo
 
+# Add COPR repository with latest libabigail
+RUN cd /etc/yum.repos.d/ && \
+    curl -L -O  https://copr.fedorainfracloud.org/coprs/g/osci/libabigail/repo/epel-9/group_osci-libabigail-epel-9.repo
+
 # Update and install dependencies
 RUN dnf -y update &&\
     dnf -y install --enablerepo=rhel-9-buildroot \
@@ -40,8 +44,8 @@ RUN dnf -y update &&\
     git \
     jq \
     brewkoji \
-    "libabigail >= 2.6" \
-    "annobin-annocheck >= 12.65" \
+    "libabigail >= 2.7" \
+    "annobin-annocheck >= 12.93" \
     && dnf clean all
 
 # Prepare the configuration file to run rpminspect against Brew stage.

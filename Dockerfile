@@ -15,7 +15,7 @@ RUN dnf -y install 'dnf5-command(copr)' && \
 RUN dnf install -y --enablerepo=updates-testing \
     ${RPMINSPECT_PACKAGE_NAME} \
     ${RPMINSPECT_DATA_PACKAGE_NAME} \
-    "libabigail >= 2.7" \
+    "libabigail >= 2.8" \
     "annobin-annocheck >= 12.93" \
     clamav-update \
     python3-pyyaml \

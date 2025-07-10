@@ -44,7 +44,7 @@ RUN dnf -y update &&\
     git \
     jq \
     brewkoji \
-    "libabigail >= 2.7" \
+    "libabigail >= 2.8" \
     "annobin-annocheck >= 12.93" \
     && dnf clean all
 

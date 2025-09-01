@@ -1,12 +1,15 @@
 #!/bin/bash
 
 # Usage:
-# ./rpminspect_runner.sh $TASK_ID $PREVIOUS_TAG
+# ./rpminspect_runner.sh $TASK_ID [$PREVIOUS_TAG]
 #
 # The script recognizes following environment variables:
 # RPMINSPECT_CONFIG - path to the rpminspect config file
 # RPMINSPECT_PROFILE_NAME - rpminspect profile to use
-# PREVIOUS_TAG - koji tag where to look for previous builds
+# PREVIOUS_TAG - (deprecated) koji tag where to look for previous builds
+#                (Use DISTRO environment variable instead)
+# DISTRO - The equivalent distro context passed to testing-farm, e.g. "fedora-rawhide"
+#          See get_previous_tag.py
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # KOJI_BIN - path where to find "koji" binary
@@ -44,7 +47,13 @@ koji_bin=${KOJI_BIN:-/usr/bin/koji}
 exts="yaml json dson"
 
 task_id=${1}
-previous_tag=${2}
+if [ -n "$DISTRO" ]; then
+  read_distro_output=($(read_distro.py "$DISTRO"))
+  DEFAULT_RELEASE_STRING="${read_distro_output[0]}"
+  previous_tag="${read_distro_output[1]}"
+else
+  previous_tag=${2}
+fi
 
 
 # In case there is no dist tag (like ".fc34") in the package name,

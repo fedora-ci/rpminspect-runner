@@ -31,7 +31,11 @@ def main(distro_name: str) -> None:
     else:
         # TODO: Deal with epel and eln
         raise NotImplementedError
-    distro_info = next(d for d in fedora_all if d.branch == branch)
+    try:
+        distro_info = next(d for d in fedora_all if d.branch == branch)
+    except StopIteration:
+        click.echo(f"Branch not valid: {branch}", err=True)
+        exit(1)
     # TODO: would be cleaner if we made rpminspect_runner.sh a python script instead
     print(f"fc{distro_info.version_number}")
     print(f"f{distro_info.version_number}-updates")

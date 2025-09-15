@@ -9,7 +9,7 @@
 # PREVIOUS_TAG - (deprecated) koji tag where to look for previous builds
 #                (Use DISTRO environment variable instead)
 # DISTRO - The equivalent distro context passed to testing-farm, e.g. "fedora-rawhide"
-#          See get_previous_tag.py
+#          See read_distro.py
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # KOJI_BIN - path where to find "koji" binary

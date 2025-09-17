@@ -22,6 +22,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     python3-click \
     python3-retry \
     python3-GitPython \
+    python3-fedora-distro-aliases \
     koji \
     gawk \
     git \

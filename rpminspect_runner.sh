@@ -117,10 +117,10 @@ get_before_build() {
     before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
     if [ "${before_build}" == "${after_build}" ]; then
 
-	# Reset $before_build so we can return an empty string if no previous builds are found
-	before_build=''
+        # Reset $before_build so we can return an empty string if no previous builds are found
+        before_build=''
 
-	# Look back 2 builds to see if we have an older version to compare against
+        # Look back 2 builds to see if we have an older version to compare against
         latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
         for nvr in $latest_two; do
             if [ "${nvr}" != "${after_build}" ]; then

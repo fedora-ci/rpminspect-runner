@@ -207,20 +207,31 @@ if [ "${is_module}" == "yes" ]; then
     after_build_param="${after_build}"
     repo_ref=$("${koji_bin}" buildinfo "${after_build_param}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 else
+    # RPM build
     if [ -n "${KOJI_NVR}" ]; then
+        # The NVR was given to us, so we can use it directly
         after_build="${KOJI_NVR}"
         after_build_param="${after_build}"
     else
+        # The NVR was not given to us, so we need to get it from the task ID
         task_info=$(get_task_info "${task_id}")
+        # Get the NVR from the task info
         after_build=$(echo "$task_info" | awk '{ print $1 }')
+        # Get the scratch status from the task info
         is_scratch=$(echo "$task_info" | awk '{ print $2 }')
-        if [ -n "$previous_tag" ]; then
-            before_build=$(get_before_build "${after_build}" "${previous_tag}")
-        fi
+        # If this is a regular build, we will use the NVR as the after build parameter for rpminspect.
+        # For scratch builds, we have to use the task ID as the after build parameter.
         if [ "$is_scratch" == "no" ]; then
             after_build_param="$after_build"
         fi
     fi
+
+    # Try to find the previous build for the given NVR
+    if [ -n "$previous_tag" ]; then
+        before_build=$(get_before_build "${after_build}" "${previous_tag}")
+    fi
+
+    # Get the commit hash for the given task ID
     repo_ref=$("${koji_bin}" taskinfo -v "${task_id}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 fi
 

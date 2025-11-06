@@ -9,6 +9,7 @@ ENV RPMINSPECT_DATA_PACKAGE_NAME=rpminspect-data-redhat
 
 ENV KOJI_BIN=/usr/bin/brew
 ENV RPMINSPECT_CONFIG=/usr/share/rpminspect/redhat.yaml
+ENV KOJI_HUB_URL=https://brewhub.engineering.redhat.com/brewhub
 
 # Add repository for "brew" command
 RUN cd /etc/yum.repos.d/ && \

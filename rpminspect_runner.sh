@@ -22,6 +22,7 @@
 # CLAMAV_DATABASE_MIRROR_URL - if set, use this mirror to update the clamav database
 # IGNORE_LOCAL_RPMINSPECT_YAML - "yes" if the local rpminspect.yaml file should be ignored
 # RPMINSPECT_YAML_LOOKUP_STRATEGY - one of: "branch", "commit", "fallback". Where to look for the local rpminspect.yaml file
+# REPOSITORY_URL - the URL of the repository to fetch the rpminspect.yaml file from
 
 set -e
 
@@ -244,8 +245,14 @@ else
     repo_ref=$("${koji_bin}" taskinfo -v "${task_id}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
 fi
 
-repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }' | awk -F'?' '{ print $1 }')
-commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print $1 }')
+get-source-url-and-commit.py "${task_id}" > source_url_and_commit.json
+cat source_url_and_commit.json
+
+repo_url=${REPOSITORY_URL}
+if [ -z "${repo_url}" ]; then
+    repo_url=$(cat source_url_and_commit.json | jq -r .source_url)
+fi
+commit_ref=$(cat source_url_and_commit.json | jq -r .commit)
 
 if [ "${IGNORE_LOCAL_RPMINSPECT_YAML}" == "yes" ]; then
     echo "IGNORE_LOCAL_RPMINSPECT_YAML is set to "yes" -> skipping fetching the local rpminspect.yaml file"

@@ -1,9 +1,14 @@
 stages:
   - buildimage
 
+default:
+  tags:
+    - itup-alm-x86
+
 variables:
   CI_REGISTRY: images.paas.redhat.com
   CI_REGISTRY_REPO: osci/rpminspect
+  KUBERNETES_MEMORY_LIMIT: "4Gi"
 
 image build:
   rules:
@@ -12,8 +17,6 @@ image build:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   stage: buildimage
-  tags:
-    - shared-podman
   before_script:
     - mkdir -p /kaniko/.docker
     - cat "$DOCKER_AUTH_CONFIG" > /kaniko/.docker/config.json
@@ -33,8 +36,6 @@ merge request image build:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   stage: buildimage
-  tags:
-    - shared-podman
   before_script:
     - mkdir -p /kaniko/.docker
     - cat "$DOCKER_AUTH_CONFIG" >  /kaniko/.docker/config.json

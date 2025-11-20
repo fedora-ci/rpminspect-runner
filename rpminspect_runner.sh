@@ -197,6 +197,8 @@ after_build_param="${task_id}"
 
 repo_ref=''
 before_build=''
+repo_url=''
+commit_ref=''
 
 if [ "${is_module}" == "yes" ]; then
 
@@ -216,6 +218,9 @@ if [ "${is_module}" == "yes" ]; then
     fi
     after_build_param="${after_build}"
     repo_ref=$("${koji_bin}" buildinfo "${after_build_param}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
+    # Extract the repository URL and commit hash from repo_ref
+    repo_url=$(echo "${repo_ref}" | awk -F'#' '{ print $1 }' | awk -F'?' '{ print $1 }')
+    commit_ref=$(echo "${repo_ref}" | awk -F'#' '{ print $2 }' | awk -F'?' '{ print $1 }')
 else
     # RPM build
     if [ -n "${KOJI_NVR}" ]; then
@@ -243,16 +248,16 @@ else
 
     # Get the commit hash for the given task ID
     repo_ref=$("${koji_bin}" taskinfo -v "${task_id}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
-fi
-
-get-source-url-and-commit.py "${task_id}" > source_url_and_commit.json
-cat source_url_and_commit.json
-
-repo_url=${REPOSITORY_URL}
-if [ -z "${repo_url}" ]; then
+    get-source-url-and-commit.py "${task_id}" > source_url_and_commit.json
+    cat source_url_and_commit.json
     repo_url=$(cat source_url_and_commit.json | jq -r .source_url)
+    commit_ref=$(cat source_url_and_commit.json | jq -r .commit)
 fi
-commit_ref=$(cat source_url_and_commit.json | jq -r .commit)
+
+if [ -n "${REPOSITORY_URL}" ]; then
+    # Use the repository URL from the environment variable, if set
+    repo_url=${REPOSITORY_URL}
+fi
 
 if [ "${IGNORE_LOCAL_RPMINSPECT_YAML}" == "yes" ]; then
     echo "IGNORE_LOCAL_RPMINSPECT_YAML is set to "yes" -> skipping fetching the local rpminspect.yaml file"

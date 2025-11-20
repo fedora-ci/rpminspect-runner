@@ -16,7 +16,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     ${RPMINSPECT_PACKAGE_NAME} \
     ${RPMINSPECT_DATA_PACKAGE_NAME} \
     "libabigail >= 2.8" \
-    "annobin-annocheck >= 12.93" \
+    "annobin-annocheck >= 13.03" \
     clamav-update \
     python3-pyyaml \
     python3-click \

@@ -27,6 +27,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     gawk \
     git \
     jq \
+    redhat-rpm-config \
     && dnf clean all
 
 # Update the virus database (we also update it when running the inspection)

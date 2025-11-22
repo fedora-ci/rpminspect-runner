@@ -3,7 +3,7 @@ stages:
 
 default:
   tags:
-    - itup-alm-x86
+    - shared-podman
 
 variables:
   CI_REGISTRY: images.paas.redhat.com

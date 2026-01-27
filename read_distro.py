@@ -7,8 +7,6 @@
 # ]
 # ///
 
-import re
-
 import click
 from fedora_distro_aliases import (
     filter_distro,
@@ -34,14 +32,14 @@ def get_build_macros(build_tag: str):
 
 
 @click.command()
-@click.argument("distro-name")
-def main(distro_name: str) -> None:
+@click.argument("dist-git-branch")
+def main(dist_git_branch: str) -> None:
     """
     Get the equivalent previous tag from the distro context
     """
-    distro_info = filter_distro(aliases, namever=distro_name)
+    distro_info = filter_distro(aliases, branch=dist_git_branch)
     if not distro_info:
-        click.echo(f"Could not identify distro '{distro_name}'", err=True)
+        click.echo(f"Could not identify distro for branch '{dist_git_branch}'", err=True)
         exit(1)
     # There does not seem to be an easy way to get %{?distro} so we build it manually for each case
     match distro_info.product:
@@ -67,7 +65,7 @@ def main(distro_name: str) -> None:
             print(f"el{epel_version.replace('.','_')}")
             print(f"epel{epel_version}")
         case _:
-            click.echo(f"Unrecognized distro.product '{distro_info.product}' of '{distro_name}'", err=True)
+            click.echo(f"Unrecognized distro.product '{distro_info.product}' of '{dist_git_branch}'", err=True)
             exit(1)
 
 

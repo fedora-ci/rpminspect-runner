@@ -8,8 +8,8 @@
 # RPMINSPECT_PROFILE_NAME - rpminspect profile to use
 # PREVIOUS_TAG - (deprecated) koji tag where to look for previous builds
 #                (Use DISTRO environment variable instead)
-# DISTRO - The equivalent distro context passed to testing-farm, e.g. "fedora-rawhide"
-#          See read_distro.py
+# DIST_GIT_BRANCH - The dist-git target branch
+#                   See read_distro.py
 # DEFAULT_RELEASE_STRING - release string to use in case builds
 #                          don't have them (e.g.: missing ".fc34")
 # KOJI_BIN - path where to find "koji" binary
@@ -48,8 +48,8 @@ koji_bin=${KOJI_BIN:-/usr/bin/koji}
 exts="yaml json dson"
 
 task_id=${1}
-if [ -n "$DISTRO" ]; then
-  read_distro_output=($(read_distro.py "$DISTRO"))
+if [ -n "$DIST_GIT_BRANCH" ]; then
+  read_distro_output=($(read_distro.py "$DIST_GIT_BRANCH"))
   DEFAULT_RELEASE_STRING="${read_distro_output[0]}"
   previous_tag="${read_distro_output[1]}"
 else

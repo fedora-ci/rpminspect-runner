@@ -49,6 +49,7 @@ RUN dnf -y update &&\
     "annobin-annocheck >= 13.03" \
     redhat-rpm-config \
     rpmautospec-rpm-macros \
+    rubygems-devel \
     && dnf clean all
 
 # Prepare the configuration file to run rpminspect against Brew stage.

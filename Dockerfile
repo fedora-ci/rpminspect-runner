@@ -28,6 +28,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     git \
     jq \
     redhat-rpm-config \
+    rubygems-devel \
     && dnf clean all
 
 # Update the virus database (we also update it when running the inspection)

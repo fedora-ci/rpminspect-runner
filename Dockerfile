@@ -28,6 +28,7 @@ RUN dnf install -y --enablerepo=updates-testing \
     git \
     jq \
     redhat-rpm-config \
+    ruby-devel \
     rubygems-devel \
     && dnf clean all
 

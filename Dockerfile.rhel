@@ -49,6 +49,7 @@ RUN dnf -y update &&\
     "annobin-annocheck >= 13.03" \
     redhat-rpm-config \
     rpmautospec-rpm-macros \
+    ruby-devel \
     rubygems-devel \
     && dnf clean all
 

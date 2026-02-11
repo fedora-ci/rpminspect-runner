@@ -55,13 +55,13 @@ def main(dist_git_branch: str) -> None:
                 print(f"eln{eln_macro}")
                 print("eln")
             else:
-                print(f"fc{distro_info.version}")
-                if distro_info.branch == "rawhide":
-                    print(f"f{distro_info.version}")
+                print(f"fc{distro_info.version_number}")
+                if distro_info.state == "pending":
+                    print(f"f{distro_info.version_number}")
                 else:
-                    print(f"f{distro_info.version}-updates")
+                    print(f"f{distro_info.version_number}-updates")
         case "epel":
-            epel_version: str = distro_info.version
+            epel_version: str = distro_info.version_number
             print(f"el{epel_version.replace('.','_')}")
             print(f"epel{epel_version}")
         case _:

@@ -7,7 +7,7 @@
 # RPMINSPECT_CONFIG - path to the rpminspect config file
 # RPMINSPECT_PROFILE_NAME - rpminspect profile to use
 # PREVIOUS_TAG - (deprecated) koji tag where to look for previous builds
-#                (Use DISTRO environment variable instead)
+#                (Use DIST_GIT_BRANCH environment variable instead)
 # DIST_GIT_BRANCH - The dist-git target branch
 #                   See read_distro.py
 # DEFAULT_RELEASE_STRING - release string to use in case builds

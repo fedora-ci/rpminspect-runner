@@ -41,11 +41,11 @@ def main(dist_git_branch: str) -> None:
     if not distro_info:
         click.echo(f"Could not identify distro for branch '{dist_git_branch}'", err=True)
         exit(1)
-    # There does not seem to be an easy way to get %{?distro} so we build it manually for each case
+    # There does not seem to be an easy way to get %{?dist} so we build it manually for each case
     match distro_info.product:
         case "fedora":
             if distro_info.branch == "eln":
-                # Special handling for eln since the `%{?distro}` has is not predictable
+                # Special handling for eln since the `%{?dist}` has is not predictable
                 try:
                     configs = get_build_macros("eln-build")
                     eln_macro = configs["extra"]["rpm.macro.eln"]

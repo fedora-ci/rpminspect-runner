@@ -49,7 +49,7 @@ exts="yaml json dson"
 
 task_id=${1}
 if [ -n "$DIST_GIT_BRANCH" ]; then
-  read_distro_output=($(read_distro.py "$DIST_GIT_BRANCH"))
+  mapfile -t read_distro_output < <(read_distro.py "$DIST_GIT_BRANCH")
   DEFAULT_RELEASE_STRING="${read_distro_output[0]}"
   previous_tag="${read_distro_output[1]}"
 else
@@ -72,7 +72,7 @@ tests="${TESTS}"
 skip_tests="${SKIP_TESTS}"
 
 # support running out of git tree
-MYDIR="$(dirname $(realpath "$0"))"
+MYDIR="$(dirname "$(realpath "$0")")"
 export PATH="$PATH:$MYDIR:$MYDIR/scripts"
 
 get_name_from_nvr() {
@@ -123,7 +123,8 @@ get_before_build() {
     # $2: Koji tag where to look for older builds
     local after_build=$1
     local previous_tag=$2
-    local package_name=$(get_name_from_nvr $after_build)
+    local package_name
+    package_name=$(get_name_from_nvr "$after_build")
     before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
     if [ "${before_build}" == "${after_build}" ]; then
 
@@ -154,8 +155,10 @@ get_before_module_build() {
     # $2: Koji tag where to look for older builds
     local after_build=$1
     local previous_tag=$2
-    local name=$(get_name_from_nvr $after_build)
-    local name_stream=$(get_ns_from_module_nvr $after_build)
+    local name
+    local name_stream
+    name=$(get_name_from_nvr "$after_build")
+    name_stream=$(get_ns_from_module_nvr "$after_build")
     before_build=$(${koji_bin} list-tagged --inherit --latest-n=2 --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -1)
 
     if [ "${before_build}" == "${after_build}" ]; then
@@ -260,7 +263,7 @@ if [ -n "${REPOSITORY_URL}" ]; then
 fi
 
 if [ "${IGNORE_LOCAL_RPMINSPECT_YAML}" == "yes" ]; then
-    echo "IGNORE_LOCAL_RPMINSPECT_YAML is set to "yes" -> skipping fetching the local rpminspect.yaml file"
+    echo 'IGNORE_LOCAL_RPMINSPECT_YAML is set to "yes" -> skipping fetching the local rpminspect.yaml file'
 else
     fetch-my-conf.py ${RPMINSPECT_YAML_LOOKUP_STRATEGY:+--strategy "$RPMINSPECT_YAML_LOOKUP_STRATEGY"} "${repo_url}" "${CONFIG_BRANCHES}" "${commit_ref}" || :
 fi

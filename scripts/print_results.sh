@@ -3,7 +3,6 @@
 set -e
 
 test_name="${1}"
-script_dir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 results_cache_dir="${RPMINSPECT_WORKDIR:-${PWD}}/results_cache"
 
 

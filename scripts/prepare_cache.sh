@@ -13,7 +13,6 @@ fi
 
 set -e
 
-script_dir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 workdir=${RPMINSPECT_WORKDIR:-${PWD}}
 cache_dir="${workdir}/cache"
 after_cache_dir="${cache_dir}/after"

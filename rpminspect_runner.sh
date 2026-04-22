@@ -36,11 +36,11 @@ fix_rc() {
     #
     # These status codes need to be translated to the TMT status codes,
     # so TMT can correctly recognize failures, errors, and successes.
-    if [ ${retval} -gt 3 ]; then
+    if [ "${retval}" -gt 3 ]; then
         # something unexpected happened — treat it as an infra error
         exit 2
     fi
-    exit $retval
+    exit "${retval}"
 }
 
 config=${RPMINSPECT_CONFIG:-/usr/share/rpminspect/fedora.yaml}
@@ -63,12 +63,17 @@ default_release_string=${DEFAULT_RELEASE_STRING}
 
 profile_name=${RPMINSPECT_PROFILE_NAME}
 
+# Intentional env → local names (ARCHES, IS_MODULE, …)
+# shellcheck disable=SC2153
 arches=${ARCHES}
 
+# shellcheck disable=SC2153
 is_module="${IS_MODULE}"
 
+# shellcheck disable=SC2153
 tests="${TESTS}"
 
+# shellcheck disable=SC2153
 skip_tests="${SKIP_TESTS}"
 
 # support running out of git tree
@@ -81,8 +86,10 @@ get_name_from_nvr() {
     # $1: NVR
     local nvr=$1
     # Pfff... close your eyes here...
-    name=$(echo $nvr | sed 's/^\(.*\)-\([^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
-    echo -n ${name}
+    # sed used for NVR parsing (hyphens in version)
+    # shellcheck disable=SC2001
+    name=$(echo "$nvr" | sed 's/^\(.*\)-\([^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
+    echo -n "${name}"
 }
 
 get_ns_from_module_nvr() {
@@ -90,8 +97,10 @@ get_ns_from_module_nvr() {
     # Params:
     # $1: NVR
     local nvr=$1
-    name=$(echo $nvr | sed 's/^\(.*[^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
-    echo -n ${name}
+    # sed used for module NVR parsing
+    # shellcheck disable=SC2001
+    name=$(echo "$nvr" | sed 's/^\(.*[^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
+    echo -n "${name}"
 }
 
 get_task_info() {
@@ -125,14 +134,14 @@ get_before_build() {
     local previous_tag=$2
     local package_name
     package_name=$(get_name_from_nvr "$after_build")
-    before_build=$(${koji_bin} list-tagged --latest --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
+    before_build=$("${koji_bin}" list-tagged --latest --inherit --quiet "${previous_tag}" "${package_name}" | awk -F' ' '{ print $1 }')
     if [ "${before_build}" == "${after_build}" ]; then
 
         # Reset $before_build so we can return an empty string if no previous builds are found
         before_build=''
 
         # Look back 2 builds to see if we have an older version to compare against
-        latest_two=$(${koji_bin} list-tagged --latest-n 2 --inherit --quiet ${previous_tag} ${package_name} | awk -F' ' '{ print $1 }')
+        latest_two=$("${koji_bin}" list-tagged --latest-n 2 --inherit --quiet "${previous_tag}" "${package_name}" | awk -F' ' '{ print $1 }')
         for nvr in $latest_two; do
             if [ "${nvr}" != "${after_build}" ]; then
                 before_build=${nvr}
@@ -142,7 +151,7 @@ get_before_build() {
 
     fi
     # Provide either an empty string or the previous build
-    echo -n ${before_build}
+    echo -n "${before_build}"
 }
 
 get_before_module_build() {
@@ -159,21 +168,21 @@ get_before_module_build() {
     local name_stream
     name=$(get_name_from_nvr "$after_build")
     name_stream=$(get_ns_from_module_nvr "$after_build")
-    before_build=$(${koji_bin} list-tagged --inherit --latest-n=2 --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -1)
+    before_build=$("${koji_bin}" list-tagged --inherit --latest-n=2 --quiet "${previous_tag}" "${name}" | grep "^${name_stream}" | awk -F' ' '{ print $1 }' | tail -1)
 
     if [ "${before_build}" == "${after_build}" ]; then
         # Reset $before_build so we can return an empty string if no previous builds are found
         before_build=''
 
         # Get the latest-1 NVR
-        before_build_candidate=$(${koji_bin} list-tagged --inherit --latest-n=2 --quiet ${previous_tag} ${name} | grep "^${name_stream}" | awk -F' ' '{ print $1 }'  | head -1)
+        before_build_candidate=$("${koji_bin}" list-tagged --inherit --latest-n=2 --quiet "${previous_tag}" "${name}" | grep "^${name_stream}" | awk -F' ' '{ print $1 }'  | head -1)
         if [ "${before_build_candidate}" != "${after_build}" ]; then
                 before_build=${before_build_candidate}
         fi
     fi
 
     # Provide either an empty string or the previous build
-    echo -n ${before_build}
+    echo -n "${before_build}"
 }
 
 
@@ -253,8 +262,8 @@ else
     repo_ref=$("${koji_bin}" taskinfo -v "${task_id}" | grep "Source: " | awk '{ print $2 }' | sed 's|^git+||')
     get-source-url-and-commit.py "${task_id}" > source_url_and_commit.json
     cat source_url_and_commit.json
-    repo_url=$(cat source_url_and_commit.json | jq -r .source_url)
-    commit_ref=$(cat source_url_and_commit.json | jq -r .commit)
+    repo_url=$(jq -r .source_url < source_url_and_commit.json)
+    commit_ref=$(jq -r .commit < source_url_and_commit.json)
 fi
 
 if [ -n "${REPOSITORY_URL}" ]; then
@@ -303,7 +312,7 @@ rc=0
         fi
     done
     rpm -qa | grep rpminspect
-    /usr/bin/rpminspect -c ${config} \
+    /usr/bin/rpminspect -c "${config}" \
         --workdir "${workdir}" \
         --format=json \
         --output="${output_filename}" \
@@ -313,7 +322,7 @@ rc=0
         ${profile_name:+--profile=$profile_name} \
         ${tests:+--tests=$tests} \
         ${skip_tests:+--exclude=$skip_tests} \
-        ${before_build} \
+        "${before_build}" \
         "${after_build_param}"
 ) > "$verbose_log" 2>&1 || rc=$?
 

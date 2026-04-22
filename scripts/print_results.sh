@@ -7,6 +7,8 @@ results_cache_dir="${RPMINSPECT_WORKDIR:-${PWD}}/results_cache"
 
 
 trap fix_rc EXIT SIGINT SIGSEGV
+# fix_rc is invoked via EXIT trap
+# shellcheck disable=SC2329,SC2317
 fix_rc() {
     retval=$?
     # rpminspect status codes:
@@ -16,11 +18,11 @@ fix_rc() {
     #
     # These status codes need to be translated to the TMT status codes,
     # so TMT can correctly recognize failures, errors, and successes.
-    if [ ${retval} -gt 3 ]; then
+    if [ "${retval}" -gt 3 ]; then
         # something unexpected happened — treat it as infra error
         exit 2
     fi
-    exit $retval
+    exit "${retval}"
 }
 
 

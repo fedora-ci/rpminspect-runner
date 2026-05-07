@@ -103,7 +103,7 @@ get_task_info() {
     build_nvr=$(basename "$(echo "$task_info" | grep "SRPM: " | head -1 | awk '{ print $2 }' | sed 's|\.src.rpm$||g')")
     if [ -z "$build_nvr" ]; then
       # Imported Konflux builds don't have SRPM tasks
-      build_nvr=$(echo "$task_info" | grep "Build: " | head -1 | awk '{ print $2 }')
+      build_nvr=$(echo "$task_info" | grep "Build: " | tail -1 | awk '{ print $2 }')
     fi
     is_scratch="no"
     is_scratch_output=$(echo "$task_info" | grep "scratch: True")

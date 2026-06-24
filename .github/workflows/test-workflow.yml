@@ -1,5 +1,10 @@
 name: Image build and push
 on: [push, pull_request]
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
@@ -8,12 +13,33 @@ jobs:
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+      - name: Gather metadata
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: quay.io/fedoraci/rpminspect
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            # set latest tag for default branch
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Build Image
         uses: redhat-actions/buildah-build@v2
+        id: build
         with:
           image: quay.io/fedoraci/rpminspect
-          tags: latest ${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
           containerfiles: |
             ./Dockerfile
+      - name: Push to GitHub Image registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ github.event_name == 'pull_request' }}
       - run: echo "🍏 This job's status is ${{ job.status }}."

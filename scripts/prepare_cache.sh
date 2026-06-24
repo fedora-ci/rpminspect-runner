@@ -13,7 +13,6 @@ fi
 
 set -e
 
-script_dir=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 workdir=${RPMINSPECT_WORKDIR:-${PWD}}
 cache_dir="${workdir}/cache"
 after_cache_dir="${cache_dir}/after"
@@ -60,6 +59,7 @@ popd
 mv "${after_cache_dir}" "${cache_dir}/${after_build}"
 
 # fetch the previous build from Koji
+# shellcheck disable=SC2001
 component_name=$(echo "${srpm_rpm}" | sed 's/^\(.*\)-\([^-]\{1,\}\)-\([^-]\{1,\}\)$/\1/')
 before_nvr=$("${KOJI_BIN}" -p "${KOJI_PROFILE}" list-tagged --latest --inherit --quiet "${BEFORE_BUILD_TAG}" "${component_name}" | awk -F' ' '{ print $1 }')
 

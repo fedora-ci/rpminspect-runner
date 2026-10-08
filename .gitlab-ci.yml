@@ -1,49 +1,14 @@
-stages:
-  - buildimage
-
-default:
-  tags:
-    - itup-alm-x86
+---
+include:
+  - project: osci/deployments/ci-deployment-templates
+    file: build-upload-image-template.yml
 
 variables:
-  CI_REGISTRY: images.paas.redhat.com
-  CI_REGISTRY_REPO: osci/rpminspect
-  KUBERNETES_MEMORY_LIMIT: "4Gi"
+  CI_REGISTRY_REPO: rpminspect
+  DOCKERFILE_PATH: $CI_PROJECT_DIR/Dockerfile.rhel
 
-image build:
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  stage: buildimage
-  before_script:
-    - mkdir -p /kaniko/.docker
-    - cat "$DOCKER_AUTH_CONFIG" > /kaniko/.docker/config.json
-  script:
-    - >
-      /kaniko/executor
-      --skip-tls-verify
-      --context $CI_PROJECT_DIR
-      --dockerfile $CI_PROJECT_DIR/Dockerfile.rhel
-      --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:${CI_COMMIT_SHORT_SHA}
-      --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:latest
+build-and-upload-image:
+  extends: .build-and-upload-image
 
-merge request image build:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  stage: buildimage
-  before_script:
-    - mkdir -p /kaniko/.docker
-    - cat "$DOCKER_AUTH_CONFIG" >  /kaniko/.docker/config.json
-  script:
-    - >
-      /kaniko/executor
-      --skip-tls-verify
-      --context $CI_PROJECT_DIR
-      --dockerfile $CI_PROJECT_DIR/Dockerfile.rhel
-      --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:mr-${CI_MERGE_REQUEST_IID}
-      --destination ${CI_REGISTRY}/${CI_REGISTRY_REPO}:mr-${CI_MERGE_REQUEST_IID}-${CI_COMMIT_SHORT_SHA}
+mr-build-and-upload-image:
+  extends: .mr-build-and-upload-image
